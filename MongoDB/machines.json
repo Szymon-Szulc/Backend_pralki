@@ -1,0 +1,21 @@
+[{
+  "_id": {
+    "$oid": "63bbfbabed2e5eb435648717"
+  },
+  "mid": "bf842f6b49fba9f5a0xm1f",
+  "did": 2,
+  "turn_on": false,
+  "localkey": "f10126d401e6acdb",
+  "ip": "192.168.14.220",
+  "name": "pralka 1"
+},{
+  "_id": {
+    "$oid": "63bbfbe8ed2e5eb435648718"
+  },
+  "mid": "bfa4dbe0186f514c6e6l4m",
+  "did": 2,
+  "turn_on": true,
+  "localkey": "1071206da06ba6ab",
+  "ip": "192.168.14.227",
+  "name": "pralka 2"
+}]

@@ -1,0 +1,19 @@
+[{
+  "_id": {
+    "$oid": "63b2df893e4917355b7aa8f6"
+  },
+  "email": "stefan@pralnie.com",
+  "password": "stefan123",
+  "name": "Stefan",
+  "uid": 1,
+  "did": 1
+},{
+  "_id": {
+    "$oid": "63b2dfb03e4917355b7aa8f8"
+  },
+  "email": "andrzej@duda.com",
+  "password": "KotJarkaNajlepszy",
+  "name": "Andrzej",
+  "uid": 2,
+  "did": 2
+}]
