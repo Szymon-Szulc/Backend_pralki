@@ -116,7 +116,7 @@ class VerifyEmail(Resource):
         return {"token": token}, 200
 
 class JoinDorm(Resource):
-    def put(self):
+    def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument("token", required=True, help="Token cannot be blank!")
         parser.add_argument("code", required=True, help="Dorm code cannot be blank!")
@@ -161,12 +161,12 @@ class Duck(Resource):
         return {"duck": "kwa kwa 🦆"}
 
 
-api.add_resource(Login, "/user/get", "/user/login")
-api.add_resource(Register, "/user/add", "/user/register", "/user/post")
-api.add_resource(VerifyEmail, "/user/verify")
-api.add_resource(JoinDorm, "/user/joindorm")
-api.add_resource(Machine, "/machine/get")
-api.add_resource(Duck, "/duck")
+api.add_resource(Login, "/users")
+api.add_resource(Register, "/users")
+api.add_resource(VerifyEmail, "/users")
+api.add_resource(JoinDorm, "/users")
+api.add_resource(Machine, "/machines")
+api.add_resource(Duck, "/ducks")
 
 
 def run_server():

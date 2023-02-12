@@ -17,7 +17,7 @@ Liczba w nawasie (200) oznacza kod który api zwraca
 ---
 
 ### Rejestracja
-Rejestracja jest realizowane metodą `post` i dane są wysyłane w formacie `JSON`. 
+Rejestracja jest realizowane metodą `POST` i dane są wysyłane w formacie `JSON`. 
 Żeby dodać użytkownika trzeba wysłać 3 argumenty:<br>
 ```JSON
 {
@@ -29,7 +29,7 @@ Rejestracja jest realizowane metodą `post` i dane są wysyłane w formacie `JSO
 >Argument name jest modyfikowany przez api by pierwsza litera była duża przykład:
 > > stefcio -> Stefcio
 
-Adres dodawania użytkownika to: [`http://localhost:3000/user/add`](http://localhost:3000/user/add)
+Adres dodawania użytkownika to: [`http://localhost:3000/users`](http://localhost:3000/users)
 <br>Przykładowe odpowiedzi API:<br>
 
 Użytkownik dodany prawidłowo (201): 
@@ -68,7 +68,7 @@ Werykacja adresu email odbywa się metodą `PUT` i dane są wysyłane w formacie
 }
 ```
 
-Adres potwierdzania emaila to: [`http://localhost:3000/user/verify`](http://localhost:3000/user/verify)<br>
+Adres potwierdzania emaila to: [`http://localhost:3000/users`](http://localhost:3000/users)<br>
 Przykładowe odpowiedzi API:
 
 Prawidłowy kod i email (200):
@@ -95,7 +95,7 @@ Podany kod weryfikacyjny jest błędny (406):
 ```
 
 ### Dołączanie do akademika
-Werykacja adresu email odbywa się metodą `PUT` i dane są wysyłane w formacie `JSON`. Żeby potwierdzić adres email użytkownika trzeba wysłać 2 argumenty:
+Werykacja adresu email odbywa się metodą `PATCH` i dane są wysyłane w formacie `JSON`. Żeby potwierdzić adres email użytkownika trzeba wysłać 2 argumenty:
 ```JSON
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjF9.v1d8M_O74uyT_OJxTnUEbwzSZEVJR_vCMEuLKuiaPeo",
@@ -103,7 +103,7 @@ Werykacja adresu email odbywa się metodą `PUT` i dane są wysyłane w formacie
 }
 ```
 
-Adres dołączanie do akademika to: [`http://localhost:3000/user/joindorm`](http://localhost:3000/user/joindorm)<br>
+Adres dołączanie do akademika to: [`http://localhost:3000/users`](http://localhost:3000/users)<br>
 Przykładowe odpowiedzi API<br>
 
 Kod i token prawidłowy (200):
@@ -133,9 +133,9 @@ Kod akademika błędny (406):
 Logowanie użytkownika jest realizowane metodą `get` i dane są wysyłane w formcie argumentów w linku. Żeby dodać użytkownika trzeba wysłać 2 argumenty:<br>
 `email`<br>
 `hasło`<br>
-Adres logowania użytkownika to: [`http://localhost:3000/user/get`](http://localhost:3000/user/get) lub [`http://localhost:3000/user/login`](http://localhost:3000/user/login)
+Adres logowania użytkownika to: [`http://localhost:3000/users`](http://localhost:3000/users)
 <br>Przykład linku:
-[`http://localhost:3000/user/get?email=stefan@gmail.com&password=S1lneH4asło!`](http://localhost:3000/user/get?email=stefan@gmail.com&password=S1lneH4asło!)
+[`http://localhost:3000/users?email=stefan@gmail.com&password=S1lneH4asło!`](http://localhost:3000/users?email=stefan@gmail.com&password=S1lneH4asło!)
 <br>Przykładowe odpowiedzi API:<br>
 
 Dane użytkownika prawidłowe (200):
@@ -163,13 +163,9 @@ Email albo hasło nieprawidłowe (401):
 ---
 
 ### Uzyskaj kontakty 
-Uzyskiwanie kontaktów jest realizowane metodą `get` i dane są wysyłane w formacie `JSON`. Żeby uzyskać kontakty trzeba wysłać 1 argumnt:
-```JSON
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjV9.1ll_3UI5Hi83OMcX-9S4NA0lMbRQtxlx99mgZTy1vC0"
-}
-```
-Adres uzyskiwania kontaktów to: [`http://localhost:3000/machine/get`](http://localhost:3000/machine/get)<br>
+Uzyskiwanie kontaktów jest realizowane metodą `get` i dane są wysyłane w formacie argumentów w linku. Żeby uzyskać kontakty trzeba wysłać 1 argument `token`:<br>
+Adres uzyskiwania kontaktów to: [`http://localhost:3000/machines`](http://localhost:3000/machines)<br>
+Przykładowy adres: [`http://localhost:3000/machines?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjV9.1ll_3UI5Hi83OMcX-9S4NA0lMbRQtxlx99mgZTy1vC0`](http://localhost:3000/machines?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjV9.1ll_3UI5Hi83OMcX-9S4NA0lMbRQtxlx99mgZTy1vC0)<br>
 Przykładowe odpowiedzi API:
 
 Prawidłowa odpowiedź (200):
