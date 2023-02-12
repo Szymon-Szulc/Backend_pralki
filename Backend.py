@@ -1,20 +1,21 @@
-import datetime
+import random, threading, jwt, argon2
 import threading
 from time import sleep
 import tinytuya as tt
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from pymongo import MongoClient
-import jwt
 
 key = "QU5HYBscKYaDlIuFKWKnlOqhWNFVbCaBADs6ZPBsQVBFytabJaP8txjCvLVHrJJ"
 
 client = MongoClient("mongodb://localhost:27017")
 db = client.laundry
-
+ph = argon2.PasswordHasher()
 app = Flask(__name__)
 api = Api(app)
-
+# Message Creator
+def get_message(value):
+    return {"message":{"name": value}}
 
 # Auth
 def decode_user_jwt(token):
@@ -30,71 +31,118 @@ def generate_user_jwt(user_id):
     return jwt.encode(payload, key)
 
 
-# Users
-class User(Resource):
-    def __init__(self):
-        self.dorm_id = None
-        self.dorm_name = None
-        self.user = None
+def valid_password(password, email):
 
-    def get_user(self, email, password):
-        user = db.users.find_one({'email': f"{email}", 'password': f"{password}"})
-        self.user = user
-        if user is not None:
-            # użytkownik istnieje!
+    hashed = db.users.find_one({"email": email})
+    if not hashed:
+        ph.hash(password)
+        return False
+    hashed = hashed["password"]
+    try:
+        if ph.verify(hashed, password):
+            if ph.check_needs_rehash(hashed):
+                new_hashed = ph.hash(password)
+                db.users.update_one({"email": email}, {"$set": {"password": new_hashed}})
             return True
-        # użytkownik NIE istnieje!
+    except argon2.exceptions.VerifyMismatchError:
         return False
 
-    def get_dorm(self, dorm_id):
-        dorm = db.dorms.find_one({"did": dorm_id})
-        if dorm is None:
-            return False
-        dorm_name = dorm["name"]
-        self.dorm_name = dorm_name
-        return True
 
-    def get(self):
-        args = request.args
-        # print(args["email"], args["password"])
-        if not self.get_user(args["email"], args["password"]):
-            return {"code": 418}
-        # print(self.user)
-        if not self.get_dorm(self.user["did"]):
-            return {"code": 418}
-        token = generate_user_jwt(self.user['uid'])
-        print(token)
-        return {"jwt": token, "dorm-name": self.dorm_name, "username": self.user['name'], "code": 201}
+# Users
+class Register(Resource):
+    @staticmethod
+    def code_gen(length=6, dev=True):
+        code = ""
+        if dev is True:
+            return "111111"
+        for i in range(length):
+            code += str(random.choice(range(0, 9)))
+        return code
 
     def post(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("name")
-        parser.add_argument("code")
+        parser.add_argument("email", required=True, help="Email cannot be blank!")
+        parser.add_argument("password", required=True, help="Password cannot be blank!")
+        parser.add_argument("name", required=True, help="Name cannot be blank!")
         args = parser.parse_args(strict=True)
-        if not self.get_dorm(args["code"]):
-            return {"code": 418}
-        if self.get_user(args['name'], self.dorm_id):
-            return {"code": 406}
+        # hashowanie hasła
+        hash_password = ph.hash(args["password"])
+        # jeśli znaleziono użytkownika który nie potwierdził maila
+        if db.cashe_users.find_one({"email": args['email']}):
+            return get_message("Użytkownik nie potwierdził maila!"), 409
+        # jeśli znaleziono użytkownika
+        if db.users.find_one({"email": args["email"]}):
+            return get_message("Użytkownik już istnieje!"), 400
+        user = {
+            "name": args["name"].title(),
+            "email": args["email"],
+            "password": hash_password,
+            "verify_code": self.code_gen()
+        }
+        db.cashe_users.insert_one(user)
+        return get_message("Użytkownik utworzony!"), 201
+
+
+class VerifyEmail(Resource):
+    def put(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("email", required=True, help="Email cannot be blank!")
+        parser.add_argument("code", required=True, help="Code cannot be blank!")
+        args = parser.parse_args(strict=True)
+        user = db.cashe_users.find_one({"email": args["email"]})
+        # Użytkownik nie istnieje lub jest już potwierdzony
+        if user is None:
+            return get_message("Użytkownik nie istnieje"), 400
+        # Kod weryfikacyjny jest błędny
+        if not user["verify_code"] == args["code"]:
+            return get_message("Podany kod weryfikacyjny jest błędny"), 406
+
         try:
             user_id = db.users.find_one(filter={}, sort=list({"uid": -1}.items()))["uid"] + 1
         except TypeError:
             user_id = 1
-        user = {
-            "name": f"{args['name']}",
-            "uid": user_id,
-            "did": self.dorm_id
-        }
-        db.users.insert_one(user)
+
         token = generate_user_jwt(user_id)
-        return {"jwt": f"{token}", "name": f"{self.dorm_name}", "code": 201}
+
+        user_object = {
+            "name": user["name"],
+            "uid": user_id,
+            "did": 0,
+            "email": user["email"],
+            "password": user["password"]
+        }
+        db.users.insert_one(user_object)
+        db.cashe_users.delete_one({"email": user["email"]})
+        return {"token": token}, 200
+
+class JoinDorm(Resource):
+    def put(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("token", required=True, help="Token cannot be blank!")
+        parser.add_argument("code", required=True, help="Dorm code cannot be blank!")
+        args = parser.parse_args(strict=True)
+        dorm = db.dorms.find_one({"code": args["code"]})
+        user_id = decode_user_jwt(args["token"])
+        if user_id is False:
+            return get_message("Token błędny"), 401
+        if not dorm:
+            return get_message("Błędny kod akademika"), 406
+        db.users.update_one({"uid": user_id}, {"$set": {"did": dorm["did"]}})
+        return get_message("Kod akademika poprawny"), 200
+
+class Login(Resource):
+    def get(self):
+        args = request.args
+        if valid_password(args["password"], args["email"]):
+            return get_message("Zalogowano pomyślnie"), 200
+        else:
+            return get_message("Email albo hasło nieprawidłowe"), 401
 
 
 # Machines
 class Machine(Resource):
     def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("jwt")
-        args = parser.parse_args(strict=True)
+        args = request.args
         status = []
         user_id = decode_user_jwt(args['jwt'])
         if not user_id:
@@ -106,71 +154,16 @@ class Machine(Resource):
         return {"machines": status, "code": 201}
 
 
-# Booking
-class Booking(Resource):
-    # Add Booking
-    def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("jwt")
-        parser.add_argument("date")
-        parser.add_argument("time")
-        parser.add_argument("name")
-        args = parser.parse_args(strict=True)
-        try:
-            booking_id = db.bookings.find_one(filter={}, sort=list({"bid": -1}.items()))["bid"] + 1
-        except TypeError:
-            booking_id = 1
-        user_id = decode_user_jwt(args["jwt"])
-        if not user_id:
-            return {"code": 401}
-        user = db.users.find_one({"uid": user_id})
-        dorm_id = user["did"]
-        user_id = user["uid"]
-        try:
-            machine_id = db.machines.find_one({"did": dorm_id, "name": args["name"]})
-        except TypeError:
-            return {"code": 406}
-        date_args = args["date"].split("-")
-        time_args = args["time"].split(":")
-        date_time = datetime.datetime(int(date_args[0]), int(date_args[1]), int(date_args[2]), int(time_args[0]),
-                                      int(time_args[1]))
-        booking = {
-            "did": dorm_id,
-            "bid": booking_id,
-            "mid": machine_id["mid"],
-            "uid": user_id,
-            "date": date_time
-        }
-        if db.bookings.find_one({"did": dorm_id, "date": date_time, "mid": machine_id["mid"]}) is not None:
-            return {"code": 418}
-        db.bookings.insert_one(booking)
-        return {"code": 201}
-
-    def get(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument("jwt")
-        args = parser.parse_args(strict=True)
-        user_id = decode_user_jwt(args["jwt"])
-        if not user_id:
-            return {"code": 401}
-        user = db.users.find_one({"uid": user_id})
-        dorm_id = user["did"]
-        bookings = db.bookings.find({"did": dorm_id})
-        response = []
-        for booking in bookings:
-            name = db.machines.find_one({"mid": booking["mid"]})["name"]
-            response.append({"bid": booking["bid"], "date": str(booking['date'])})
-        return {"bookings": response, "code": 201}
-
-
 class Duck(Resource):
     def get(self):
         return {"duck": "kwa kwa 🦆"}
 
 
-api.add_resource(User, "/user/add", "/user/get", "/user/login")
+api.add_resource(Login, "/user/get", "/user/login")
+api.add_resource(Register, "/user/add", "/user/register", "/user/post")
+api.add_resource(VerifyEmail, "/user/verify")
+api.add_resource(JoinDorm, "/user/joindorm")
 api.add_resource(Machine, "/machine/get")
-api.add_resource(Booking, "/booking/get", "/booking/add")
 api.add_resource(Duck, "/duck")
 
 
