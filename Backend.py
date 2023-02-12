@@ -146,14 +146,14 @@ class Machine(Resource):
     def get(self):
         args = request.args
         status = []
-        user_id = decode_user_jwt(args['jwt'])
+        user_id = decode_user_jwt(args['token'])
         if not user_id:
-            return {"code": 401}
+            return get_message("Użytkownik nie istnieje"), 401
         dorm_id = db.users.find_one({'uid': user_id})['did']
         machines = db.machines.find({'did': dorm_id})
         for machine in machines:
             status.append({"turn_on": machine["turn_on"], "name": machine["name"]})
-        return {"machines": status, "code": 201}
+        return {"machines": status}, 200
 
 
 class Duck(Resource):

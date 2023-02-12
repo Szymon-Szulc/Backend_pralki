@@ -166,13 +166,13 @@ Email albo hasło nieprawidłowe (401):
 Uzyskiwanie kontaktów jest realizowane metodą `get` i dane są wysyłane w formacie `JSON`. Żeby uzyskać kontakty trzeba wysłać 1 argumnt:
 ```JSON
 {
-  "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjV9.1ll_3UI5Hi83OMcX-9S4NA0lMbRQtxlx99mgZTy1vC0"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjV9.1ll_3UI5Hi83OMcX-9S4NA0lMbRQtxlx99mgZTy1vC0"
 }
 ```
 Adres uzyskiwania kontaktów to: [`http://localhost:3000/machine/get`](http://localhost:3000/machine/get)<br>
 Przykładowe odpowiedzi API:
 
-Prawidłowa odpowiedź:
+Prawidłowa odpowiedź (200):
 ```JSON
 {
     "machines": [
@@ -184,22 +184,22 @@ Prawidłowa odpowiedź:
             "turn_on": true,
             "name": "pralka 2"
         }
-    ],
-    "code": 201
+    ]
 }
 ```
 
-Brak urządzeń w akademiku:
+Brak urządzeń w akademiku (200):
 ```JSON
 {
-    "machines": [],
-    "code": 201
+    "machines": []
 }
 ```
 
-Użytkownik nie istnieje:
+Użytkownik nie istnieje (401):
 ```JSON
 {
-  "code": 401
+  "message": {
+    "name": "Użytkownik nie istnieje"
+  }
 }
 ```
