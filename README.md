@@ -7,12 +7,13 @@ Liczba w nawasie (200) oznacza kod który api zwraca
 ## Użytkownik
 
 `dorm_name` - Nazwa akademika<br>
-`username`, `name` - Nazwa użytkownika<br>
-`message` -> `name` - Pisemna informacja odpowiedzi API<br>
+`username` `name` - Nazwa użytkownika<br>
+`message` `name` - Pisemna informacja odpowiedzi API<br>
 `code` - Kod akademika, lub kod weryfikacyjny <br>
 `token` - Json Web Token w którym zawarty jest ID użytkownika <br>
-`email` - Adres email użytkownika
-`password` - hasło użytkownika
+`email` - Adres email użytkownika<br>
+`password` - hasło użytkownika<br>
+
 ---
 
 ### Rejestracja
