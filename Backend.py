@@ -69,7 +69,7 @@ class Register(Resource):
         hash_password = ph.hash(args["password"])
         # jeśli znaleziono użytkownika który nie potwierdził maila
         if db.cashe_users.find_one({"email": args['email']}):
-            return get_message("Użytkownik nie potwierdził maila!"), 409
+            return get_message("Użytkownik nie potwierdził emaila!"), 409
         # jeśli znaleziono użytkownika
         if db.users.find_one({"email": args["email"]}):
             return get_message("Użytkownik już istnieje!"), 400
@@ -128,13 +128,15 @@ class JoinDorm(Resource):
         if not dorm:
             return get_message("Błędny kod akademika"), 406
         db.users.update_one({"uid": user_id}, {"$set": {"did": dorm["did"]}})
-        return get_message("Kod akademika poprawny"), 200
+        return {"dorm_name": dorm["name"]}, 200
 
 class Login(Resource):
     def get(self):
         args = request.args
         if valid_password(args["password"], args["email"]):
-            return get_message("Zalogowano pomyślnie"), 200
+            user = db.users.find_one({"email": args["email"]})
+            token = generate_user_jwt(user["uid"])
+            return {"token": token, "username": user["name"], "dorm_name": db.dorms.find_one({"did": user["did"]})["name"]}, 200
         else:
             return get_message("Email albo hasło nieprawidłowe"), 401
 
