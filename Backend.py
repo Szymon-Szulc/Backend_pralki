@@ -1,5 +1,5 @@
 import time
-
+import asyncio
 import argon2
 import jwt
 import random
@@ -64,6 +64,9 @@ def generate_user_jwt(user_id):
     return jwt.encode(payload, key)
 
 
+
+
+
 # Users
 class Register(Resource):
     @staticmethod
@@ -75,6 +78,12 @@ class Register(Resource):
             code += str(random.choice(range(0, 9)))
         return code
 
+    def send_mail(self, args, code):
+        with app.app_context():
+            msg = Message("Kod Weryfikacyjny", sender="no.reply.pralki@gmail.com", recipients=[args["email"]])
+            msg.html = f"Hej {args['name'].title()}!<br>Oto twój kod weryfikacyjny do aplikacji <b>AMBITNA NAZWA APLIKACJI O PRALKACH</b><br>" + code
+            mail.send(msg)
+            return
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("email", required=True, help="Email cannot be blank!")
@@ -97,9 +106,10 @@ class Register(Resource):
             "verify_code": code
         }
         db.cashe_users.insert_one(user)
-        msg = Message("Kod Weryfikacyjny", sender="no.reply.pralki@gmail.com", recipients=[args["email"]])
-        msg.html = f"Hej {args['name'].title()}!<br>Oto twój kod weryfikacyjny do aplikacji <b>AMBITNA NAZWA APLIKACJI O PRALKACH</b><br>" + code
-        mail.send(msg)
+
+        t = threading.Thread(target=self.send_mail, args=[args, code])
+        t.daemon = False
+        t.start()
         return get_message("Użytkownik utworzony!"), 201
 
 
@@ -186,7 +196,7 @@ class SendCode(Resource):
 class VerifyCode(Resource):
     def get(self, code):
         args = request.args
-        user = db.users.find_one({"email":args["email"]})
+        user = db.users.find_one({"email": args["email"]})
         if not user:
             return get_message("Nie znaleziono takiego użytkownika"), 404
 
@@ -197,7 +207,6 @@ class VerifyCode(Resource):
             return get_message("Kod jest nieprawidłowy"), 400
 
         return get_message("Kod jest prawidłowy"), 200
-
 
 
 class ResetPassword(Resource):
