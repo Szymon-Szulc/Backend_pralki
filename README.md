@@ -77,7 +77,7 @@ Prawidłowy kod i email (200):
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjJ9.z3KDaNlqVgez4hQ64Gyi_tSoV1pzIWtOb09rbGMU9Nk"
 }
 ```
-Użytkownik nieistnieje w bazie niezweryfikowanych emaili (400):
+Użytkownik nieistnieje w bazie niezweryfikowanych emaili (404):
 ```JSON
 {
     "message": {
@@ -85,7 +85,7 @@ Użytkownik nieistnieje w bazie niezweryfikowanych emaili (400):
     }
 }
 ```
-Podany kod weryfikacyjny jest błędny (406):
+Podany kod weryfikacyjny jest błędny (400):
 ```JSON
 {
     "message": {
@@ -120,7 +120,7 @@ Token nieprawidłowy (401):
     }
 }
 ```
-Kod akademika błędny (406):
+Kod akademika błędny (400):
 ```JSON
 {
     "message": {
@@ -147,7 +147,7 @@ Dane użytkownika prawidłowe (200):
 }
 ```
 
-Email albo hasło nieprawidłowe (401):
+Email albo hasło nieprawidłowe (400):
 ```JSON
 {
     "message": {

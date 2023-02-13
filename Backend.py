@@ -1,9 +1,14 @@
-import random, threading, jwt, argon2
+import time
+
+import argon2
+import jwt
+import random
 import threading
 from time import sleep
 import tinytuya as tt
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
+from flask_mail import Mail, Message
 from pymongo import MongoClient
 
 key = "QU5HYBscKYaDlIuFKWKnlOqhWNFVbCaBADs6ZPBsQVBFytabJaP8txjCvLVHrJJ"
@@ -12,27 +17,19 @@ client = MongoClient("mongodb://localhost:27017")
 db = client.laundry
 ph = argon2.PasswordHasher()
 app = Flask(__name__)
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'no.reply.pralki@gmail.com'
+app.config['MAIL_PASSWORD'] = 'ikbkhfmzropzqnjl'
+mail = Mail(app)
 api = Api(app)
-# Message Creator
-def get_message(value):
-    return {"message":{"name": value}}
-
-# Auth
-def decode_user_jwt(token):
-    headers = jwt.get_unverified_header(token)
-    try:
-        return jwt.decode(token, key, headers['alg'])["uid"]
-    except jwt.InvalidSignatureError:
-        return False
 
 
-def generate_user_jwt(user_id):
-    payload = {'uid': user_id}
-    return jwt.encode(payload, key)
-
-
+# Password validator
 def valid_password(password, email):
-
     hashed = db.users.find_one({"email": email})
     if not hashed:
         ph.hash(password)
@@ -46,6 +43,25 @@ def valid_password(password, email):
             return True
     except argon2.exceptions.VerifyMismatchError:
         return False
+
+
+# Message Creator
+def get_message(value):
+    return {"message": {"name": value}}
+
+
+# Auth
+def decode_user_jwt(token):
+    headers = jwt.get_unverified_header(token)
+    try:
+        return jwt.decode(token, key, headers['alg'])["uid"]
+    except jwt.InvalidSignatureError:
+        return False
+
+
+def generate_user_jwt(user_id):
+    payload = {'uid': user_id}
+    return jwt.encode(payload, key)
 
 
 # Users
@@ -73,13 +89,17 @@ class Register(Resource):
         # jeśli znaleziono użytkownika
         if db.users.find_one({"email": args["email"]}):
             return get_message("Użytkownik już istnieje!"), 400
+        code = self.code_gen(dev=False)
         user = {
             "name": args["name"].title(),
             "email": args["email"],
             "password": hash_password,
-            "verify_code": self.code_gen()
+            "verify_code": code
         }
         db.cashe_users.insert_one(user)
+        msg = Message("Kod Weryfikacyjny", sender="no.reply.pralki@gmail.com", recipients=[args["email"]])
+        msg.html = f"Hej {args['name'].title()}!<br>Oto twój kod weryfikacyjny do aplikacji <b>AMBITNA NAZWA APLIKACJI O PRALKACH</b><br>" + code
+        mail.send(msg)
         return get_message("Użytkownik utworzony!"), 201
 
 
@@ -115,6 +135,7 @@ class VerifyEmail(Resource):
         db.cashe_users.delete_one({"email": user["email"]})
         return {"token": token}, 200
 
+
 class JoinDorm(Resource):
     def patch(self):
         parser = reqparse.RequestParser()
@@ -130,15 +151,58 @@ class JoinDorm(Resource):
         db.users.update_one({"uid": user_id}, {"$set": {"did": dorm["did"]}})
         return {"dorm_name": dorm["name"]}, 200
 
+
 class Login(Resource):
+
     def get(self):
         args = request.args
         if valid_password(args["password"], args["email"]):
             user = db.users.find_one({"email": args["email"]})
             token = generate_user_jwt(user["uid"])
-            return {"token": token, "username": user["name"], "dorm_name": db.dorms.find_one({"did": user["did"]})["name"]}, 200
+            return {"token": token, "username": user["name"],
+                    "dorm_name": db.dorms.find_one({"did": user["did"]})["name"]}, 200
         else:
             return get_message("Email albo hasło nieprawidłowe"), 401
+
+
+class SendCode(Resource):
+    def patch(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("email", required=True, help="Email cannot be blank!")
+        args = parser.parse_args(strict=True)
+        code = Register().code_gen(dev=False)
+        user = db.users.find_one({"email": args["email"]})
+        if not user:
+            time.sleep(2)
+            return {"message": {"name": "Nie znaleziono takiego użytkownika"}}, 404
+        db.users.update_one({"email": args["email"]}, {"$set": {"code": code, "verify": False, "forget": True}})
+        msg = Message('Resetowanie Hasła', sender='no.reply.pralki@gmail.com', recipients=[args["email"]])
+        msg.html = f"Witaj {user['name']}!<br>Oto twój kod do resetowania hasła w aplikacji <b>AMBITNA NAZWA " \
+                   "APLIKACJI O PRALKACH</b>:<br>" + code
+        mail.send(msg)
+        return {"message": {"name": "Mail wysłany!"}}, 200
+
+
+class VerifyCode(Resource):
+    def get(self, code):
+        args = request.args
+        user = db.users.find_one({"email":args["email"]})
+        if not user:
+            return get_message("Nie znaleziono takiego użytkownika"), 404
+
+        if user["forget"] == False:
+            return get_message("Nie znaleziono takiego użytkownika"), 404
+
+        if not user["verify"] == code:
+            return get_message("Kod jest nieprawidłowy"), 400
+
+        return get_message("Kod jest prawidłowy"), 200
+
+
+
+class ResetPassword(Resource):
+    def patch(self):
+        pass
 
 
 # Machines
@@ -161,6 +225,9 @@ class Duck(Resource):
         return {"duck": "kwa kwa 🦆"}
 
 
+api.add_resource(SendCode, "/password-reset/send-code")
+api.add_resource(VerifyCode, "/password-reset/<string:code>")
+api.add_resource(ResetPassword, "/password-reset")
 api.add_resource(Login, "/users")
 api.add_resource(Register, "/users")
 api.add_resource(VerifyEmail, "/users")
