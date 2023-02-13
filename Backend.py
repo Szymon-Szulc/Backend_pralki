@@ -112,10 +112,10 @@ class VerifyEmail(Resource):
         user = db.cashe_users.find_one({"email": args["email"]})
         # Użytkownik nie istnieje lub jest już potwierdzony
         if user is None:
-            return get_message("Użytkownik nie istnieje"), 400
+            return get_message("Użytkownik nie istnieje"), 404
         # Kod weryfikacyjny jest błędny
         if not user["verify_code"] == args["code"]:
-            return get_message("Podany kod weryfikacyjny jest błędny"), 406
+            return get_message("Podany kod weryfikacyjny jest błędny"), 400
 
         try:
             user_id = db.users.find_one(filter={}, sort=list({"uid": -1}.items()))["uid"] + 1
@@ -162,7 +162,7 @@ class Login(Resource):
             return {"token": token, "username": user["name"],
                     "dorm_name": db.dorms.find_one({"did": user["did"]})["name"]}, 200
         else:
-            return get_message("Email albo hasło nieprawidłowe"), 401
+            return get_message("Email albo hasło nieprawidłowe"), 400
 
 
 class SendCode(Resource):
