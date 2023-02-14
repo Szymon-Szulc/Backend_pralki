@@ -77,7 +77,7 @@ class Register(Resource):
         with app.app_context():
             msg = Message("Kod Weryfikacyjny", sender="no.reply.pralki@gmail.com", recipients=[args["email"]])
             msg.html = f"Hej {args['name'].title()}!<br>Oto twój kod weryfikacyjny do aplikacji <b>AMBITNA NAZWA APLIKACJI O PRALKACH</b><br>" + code
-            mail.send(msg)
+            # mail.send(msg)
             return
     def post(self):
         parser = reqparse.RequestParser()
