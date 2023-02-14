@@ -1,5 +1,4 @@
 import time
-import asyncio
 import argon2
 import jwt
 import random
@@ -63,10 +62,6 @@ def generate_user_jwt(user_id):
     payload = {'uid': user_id}
     return jwt.encode(payload, key)
 
-
-
-
-
 # Users
 class Register(Resource):
     @staticmethod
@@ -98,7 +93,7 @@ class Register(Resource):
         # jeśli znaleziono użytkownika
         if db.users.find_one({"email": args["email"]}):
             return get_message("Użytkownik już istnieje!"), 400
-        code = self.code_gen(dev=False)
+        code = self.code_gen(dev=True)
         user = {
             "name": args["name"].title(),
             "email": args["email"],
