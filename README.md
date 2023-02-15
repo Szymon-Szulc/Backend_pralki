@@ -15,6 +15,39 @@ Liczba w nawasie (200) oznacza kod który api zwraca
 `password` - hasło użytkownika<br>
 
 ---
+### Sprawdzanie czy użytkownik jest już zarejestrowany
+Sprawdzanie jest realizowane metodą `GET` i dane są wysyłane jako argumenty w linku.
+Żeby sprawdzić zarejestrowanie użytkownika wystarczy podać 1 argument `email`:<br>
+
+Adres sprawdzania to: [`http://localhost:3000/check?email=Stefan@gmail.com`](http://localhost:3000/check?email=Stefan@gmail.com)
+<br>Przykładowe odpowiedzi API:<br>
+
+Użytkownik istnieje i potwierdził maila (200):
+```JSON
+{
+  "message": {
+    "name": "Użytkownik już istnieje"
+  }
+}
+```
+
+Użytkownik istnieje i NIE potwierdził maila (200):
+```JSON
+{
+  "message": {
+    "name": "Użytkownik nie potwierdził maila"
+  }
+}
+```
+
+Użytkownik nie istnieje (404):
+```JSON
+{
+  "message": {
+    "name": "Nie znaleziono użytkownika"
+  }
+}
+```
 
 ### Rejestracja
 Rejestracja jest realizowane metodą `POST` i dane są wysyłane w formacie `JSON`. 

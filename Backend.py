@@ -1,13 +1,14 @@
-import time
-import argon2
-import jwt
 import random
 import threading
+import time
 from time import sleep
+
+import argon2
+import jwt
 import tinytuya as tt
 from flask import Flask, request
-from flask_restful import Resource, Api, reqparse
 from flask_mail import Mail, Message
+from flask_restful import Resource, Api, reqparse
 from pymongo import MongoClient
 
 key = "QU5HYBscKYaDlIuFKWKnlOqhWNFVbCaBADs6ZPBsQVBFytabJaP8txjCvLVHrJJ"
@@ -141,6 +142,17 @@ class VerifyEmail(Resource):
         return {"token": token}, 200
 
 
+class CkeckEmail(Resource):
+    def get(self):
+        args = request.args
+        user = db.users.find_one({"email": args["email"]})
+        if user:
+            return get_message("Użytkownik już istnieje"), 200
+        user = db.cashe_users.find_one({"email": args["email"]})
+        if user:
+            return get_message("Użytkownik nie potwierdził maila"), 200
+        return get_message("Nie znaleziono użytkownika"), 404
+
 class JoinDorm(Resource):
     def patch(self):
         parser = reqparse.RequestParser()
@@ -229,6 +241,7 @@ class Duck(Resource):
         return {"duck": "kwa kwa 🦆"}
 
 
+api.add_resource(CkeckEmail, "/check")
 api.add_resource(SendCode, "/password-reset/send-code")
 api.add_resource(VerifyCode, "/password-reset/<string:code>")
 api.add_resource(ResetPassword, "/password-reset")
