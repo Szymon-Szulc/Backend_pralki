@@ -196,7 +196,7 @@ Email albo hasło nieprawidłowe (400):
 ---
 
 ### Uzyskaj kontakty 
-Uzyskiwanie kontaktów jest realizowane metodą `get` i dane są wysyłane w formacie argumentów w linku. Żeby uzyskać kontakty trzeba wysłać 1 argument `token`:<br>
+Uzyskiwanie kontaktów jest realizowane metodą `GET` i dane są wysyłane w formacie argumentów w linku. Żeby uzyskać kontakty trzeba wysłać 1 argument `token`:<br>
 Adres uzyskiwania kontaktów to: [`http://localhost:3000/machines`](http://localhost:3000/machines)<br>
 Przykładowy adres: [`http://localhost:3000/machines?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjV9.1ll_3UI5Hi83OMcX-9S4NA0lMbRQtxlx99mgZTy1vC0`](http://localhost:3000/machines?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjV9.1ll_3UI5Hi83OMcX-9S4NA0lMbRQtxlx99mgZTy1vC0)<br>
 Przykładowe odpowiedzi API:
