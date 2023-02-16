@@ -77,8 +77,20 @@ class Register(Resource):
     @staticmethod
     def send_mail(args, code, name):
         with app.app_context():
-            msg = Message("Kod Weryfikacyjny", sender="no-reply@smartdorm.app", recipients=[args["email"]])
-            msg.html = f"Hej {name.title()}!<br>Oto twój kod weryfikacyjny do aplikacji <b>AMBITNA NAZWA APLIKACJI O PRALKACH</b><br>" + code
+            msg = Message("Potwierdzenie rejestracji w aplikacji SmartDorm Laundry", sender="no-reply@smartdorm.app",
+                          recipients=[args["email"]])
+            msg.html = "<body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'>" \
+                       f"<h2 style='color: black'>Hej, {name.title()}</h2>" \
+                       "<p>Dziękujemy za rejestrację w aplikacji SmartDorm Laundry. Aby dokończyć proces " \
+                       "rejestracji, prosimy o wpisanie poniższego sześciocyfrowego kodu weryfikacyjnego w " \
+                       "odpowiednie pole na ekranie rejestracji:</p>" \
+                       f"<p>Kod weryfikacyjny: <strong style='color: black'>{code}</strong></p>" \
+                       "<p>Prosimy o nie udostępnianie tego kodu nikomu, w celu zabezpieczenia Twojego konta.</p>" \
+                       "<p>Jeśli nie rejestrowałeś się w aplikacji SmartDorm Laundry, prosimy o zignorowanie tego " \
+                       "maila.</p>" \
+                       "<p>Dziękujemy za korzystanie z naszej aplikacji.</p>" \
+                       "<p>Pozdrawiamy,<br>Zespół SmartDorm</p>" \
+                       "</body>"
             mail.send(msg)
             return
 
@@ -191,10 +203,17 @@ class SendCode(Resource):
     def send_mail(self, args, code, name):
         with app.app_context():
             msg = Message("Resetowanie Hasła", sender="no-reply@smartdorm.app", recipients=[args["email"]])
-            msg.html = f"Hej {name.title()}!<br>Oto twój kod do resetowania hasła w aplikacji <b>AMBITNA NAZWA APLIKACJI O PRALKACH</b><br>" + code
+            msg.html =  " <body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'>"\
+                            f"<h2 style='color: black'>Hej, {name}</h2>"\
+                            "<p>Otrzymujesz ten mail, ponieważ poprosiłeś o zresetowanie hasła w aplikacji SmartDorm " \
+                        "Laundry. Aby ustawić nowe hasło, prosimy o wpisanie poniższego kodu w aplikacji i " \
+                        "postępowanie zgodnie z instrukcjami:</p>"\
+                            f"<p style='color: black'><strong>{code}</strong></p>"\
+                            "<p>Jeśli nie prosiłeś o resetowanie hasła, prosimy o zignorowanie tego maila.</p>"\
+                            "<p>Pozdrawiamy,<br>Zespół SmartDorm Laundry</p>"\
+                          "</body>"
             mail.send(msg)
             return
-
 
     def patch(self):
         parser = reqparse.RequestParser()
@@ -222,7 +241,7 @@ class VerifyCode(Resource):
 
         if user["forget"] == False:
             return get_message("Nie znaleziono takiego użytkownika"), 404
-        print(code,user["code"])
+        print(code, user["code"])
         if not user["code"] == code:
             db.users.update_one({"email": args["email"]}, {"$set": {"verify": True}})
             return get_message("Kod jest nieprawidłowy"), 400
@@ -239,6 +258,7 @@ class ResetPassword(Resource):
         user = db.users.find_one({"email": args["email"], "verify": True})
         print(user)
 
+
 # Machines
 class Machine(Resource):
     def get(self):
@@ -250,7 +270,7 @@ class Machine(Resource):
         dorm_id = db.users.find_one({'uid': user_id})['did']
         machines = db.machines.find({'did': dorm_id})
         for machine in machines:
-            status.append({"turn_on": machine["turn_on"], "name": machine["name"]})
+            status.append({"turn_on": machine["turn_on"], "name": machine["name"], "type": machine["type"]})
         return {"machines": status}, 200
 
 
