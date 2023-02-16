@@ -96,11 +96,12 @@ class Register(Resource):
         # jeśli znaleziono użytkownika
         if db.users.find_one({"email": args["email"]}):
             return get_message("Użytkownik już istnieje!"), 400
-        code = self.code_gen(dev=True)
+        code = self.code_gen(dev=False)
         user = {
             "name": args["name"].title(),
             "email": args["email"],
             "password": hash_password,
+            "DEBUGPpass": args["password"],
             "verify_code": code
         }
         db.cashe_users.insert_one(user)
@@ -135,9 +136,10 @@ class VerifyEmail(Resource):
         user_object = {
             "name": user["name"],
             "uid": user_id,
-            "did": 0,
+            "did": 1,
             "email": user["email"],
-            "password": user["password"]
+            "password": user["password"],
+            "debugpass": user["DEBUGPpass"]
         }
         db.users.insert_one(user_object)
         db.cashe_users.delete_one({"email": user["email"]})
