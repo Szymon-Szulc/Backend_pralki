@@ -207,11 +207,13 @@ Prawidłowa odpowiedź (200):
     "machines": [
         {
             "turn_on": false,
-            "name": "pralka 1"
+            "name": "pralka 1",
+            "type": "0"
         },
         {
             "turn_on": true,
-            "name": "pralka 2"
+            "name": "suszarka 1",
+            "type": "1"
         }
     ]
 }
