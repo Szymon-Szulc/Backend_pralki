@@ -2,7 +2,6 @@ import random
 import threading
 import time
 from time import sleep
-
 import argon2
 import jwt
 import tinytuya as tt
@@ -18,12 +17,12 @@ db = client.laundry
 ph = argon2.PasswordHasher()
 app = Flask(__name__)
 
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'no.reply.pralki@gmail.com'
-app.config['MAIL_PASSWORD'] = 'ikbkhfmzropzqnjl'
+app.config['MAIL_SERVER'] = 'ssl0.ovh.net'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = 'no-reply@smartdorm.app'
+app.config['MAIL_PASSWORD'] = 'szymon80012'
 mail = Mail(app)
 api = Api(app)
 
@@ -63,6 +62,7 @@ def generate_user_jwt(user_id):
     payload = {'uid': user_id}
     return jwt.encode(payload, key)
 
+
 # Users
 class Register(Resource):
     @staticmethod
@@ -74,12 +74,14 @@ class Register(Resource):
             code += str(random.choice(range(0, 9)))
         return code
 
-    def send_mail(self, args, code):
+    @staticmethod
+    def send_mail(args, code, name):
         with app.app_context():
-            msg = Message("Kod Weryfikacyjny", sender="no.reply.pralki@gmail.com", recipients=[args["email"]])
-            msg.html = f"Hej {args['name'].title()}!<br>Oto twój kod weryfikacyjny do aplikacji <b>AMBITNA NAZWA APLIKACJI O PRALKACH</b><br>" + code
-            # mail.send(msg)
+            msg = Message("Kod Weryfikacyjny", sender="no-reply@smartdorm.app", recipients=[args["email"]])
+            msg.html = f"Hej {name.title()}!<br>Oto twój kod weryfikacyjny do aplikacji <b>AMBITNA NAZWA APLIKACJI O PRALKACH</b><br>" + code
+            mail.send(msg)
             return
+
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("email", required=True, help="Email cannot be blank!")
@@ -103,7 +105,7 @@ class Register(Resource):
         }
         db.cashe_users.insert_one(user)
 
-        t = threading.Thread(target=self.send_mail, args=[args, code])
+        t = threading.Thread(target=self.send_mail, args=[args, code, args["name"]])
         t.daemon = False
         t.start()
         return get_message("Użytkownik utworzony!"), 201
@@ -142,7 +144,7 @@ class VerifyEmail(Resource):
         return {"token": token}, 200
 
 
-class CkeckEmail(Resource):
+class CheckEmail(Resource):
     def get(self):
         args = request.args
         user = db.users.find_one({"email": args["email"]})
@@ -152,6 +154,7 @@ class CkeckEmail(Resource):
         if user:
             return get_message("Użytkownik nie potwierdził maila"), 200
         return get_message("Nie znaleziono użytkownika"), 404
+
 
 class JoinDorm(Resource):
     def patch(self):
@@ -183,21 +186,29 @@ class Login(Resource):
 
 
 class SendCode(Resource):
+    def send_mail(self, args, code, name):
+        with app.app_context():
+            msg = Message("Resetowanie Hasła", sender="no-reply@smartdorm.app", recipients=[args["email"]])
+            msg.html = f"Hej {name.title()}!<br>Oto twój kod do resetowania hasła w aplikacji <b>AMBITNA NAZWA APLIKACJI O PRALKACH</b><br>" + code
+            mail.send(msg)
+            return
+
+
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument("email", required=True, help="Email cannot be blank!")
         args = parser.parse_args(strict=True)
         code = Register().code_gen(dev=False)
+        # code = "111111"
         user = db.users.find_one({"email": args["email"]})
         if not user:
-            time.sleep(2)
             return {"message": {"name": "Nie znaleziono takiego użytkownika"}}, 404
         db.users.update_one({"email": args["email"]}, {"$set": {"code": code, "verify": False, "forget": True}})
-        msg = Message('Resetowanie Hasła', sender='no.reply.pralki@gmail.com', recipients=[args["email"]])
-        msg.html = f"Witaj {user['name']}!<br>Oto twój kod do resetowania hasła w aplikacji <b>AMBITNA NAZWA " \
-                   "APLIKACJI O PRALKACH</b>:<br>" + code
-        mail.send(msg)
-        return {"message": {"name": "Mail wysłany!"}}, 200
+        a = threading.Thread(target=self.send_mail, args=[args, code, user["name"]])
+        a.daemon = False
+        a.start()
+        # self.send_mail(args, code, user["name"])
+        return get_message("Mail wysłany"), 200
 
 
 class VerifyCode(Resource):
@@ -209,8 +220,9 @@ class VerifyCode(Resource):
 
         if user["forget"] == False:
             return get_message("Nie znaleziono takiego użytkownika"), 404
-
-        if not user["verify"] == code:
+        print(code,user["code"])
+        if not user["code"] == code:
+            db.users.update_one({"email": args["email"]}, {"$set": {"verify": True}})
             return get_message("Kod jest nieprawidłowy"), 400
 
         return get_message("Kod jest prawidłowy"), 200
@@ -218,8 +230,12 @@ class VerifyCode(Resource):
 
 class ResetPassword(Resource):
     def patch(self):
-        pass
-
+        parser = reqparse.RequestParser()
+        parser.add_argument("email", require=True, hint="Email cannot be blank!")
+        parser.add_argument("new_password", require=True, hint="New password cannot be blank!")
+        args = parser.parse_args(strict=True)
+        user = db.users.find_one({"email": args["email"], "verify": True})
+        print(user)
 
 # Machines
 class Machine(Resource):
@@ -241,7 +257,7 @@ class Duck(Resource):
         return {"duck": "kwa kwa 🦆"}
 
 
-api.add_resource(CkeckEmail, "/check")
+api.add_resource(CheckEmail, "/check")
 api.add_resource(SendCode, "/password-reset/send-code")
 api.add_resource(VerifyCode, "/password-reset/<string:code>")
 api.add_resource(ResetPassword, "/password-reset")
