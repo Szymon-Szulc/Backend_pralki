@@ -1,6 +1,6 @@
 import random
 import threading
-import time
+import re
 from time import sleep
 import argon2
 import jwt
@@ -160,7 +160,11 @@ class VerifyEmail(Resource):
 
 class CheckEmail(Resource):
     def get(self):
+        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         args = request.args
+        result = re.search(pattern, args["email"])
+        if not result:
+            return get_message("Niepoprawny mail"), 400
         user = db.users.find_one({"email": args["email"]})
         if user:
             return get_message("Użytkownik już istnieje"), 200
@@ -252,10 +256,15 @@ class VerifyCode(Resource):
 class ResetPassword(Resource):
     def patch(self):
         parser = reqparse.RequestParser()
-        parser.add_argument("email", require=True, hint="Email cannot be blank!")
-        parser.add_argument("new_password", require=True, hint="New password cannot be blank!")
+        parser.add_argument("email", required=True, help="Email cannot be blank!")
+        parser.add_argument("new_password", required=True, help="New password cannot be blank!")
         args = parser.parse_args(strict=True)
         user = db.users.find_one({"email": args["email"], "verify": True})
+        if not user:
+            return get_message("Nie znaleziono użytkownika"), 404
+        new_hash = ph.hash(args["new_password"])
+        db.users.update_one({"email": args["email"], "verify":True}, {"$set": {"verify": False, "forget": False, "code": None, "password": new_hash, "debugpass": args["new_password"]}})
+
         print(user)
 
 
