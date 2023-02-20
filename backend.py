@@ -162,7 +162,7 @@ class CheckEmail(Resource):
     def get(self):
         pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         args = request.args
-        result = re.search(pattern, args["email"])
+        result = re.match(pattern, args["email"])
         if not result:
             return get_message("Niepoprawny mail"), 400
         user = db.users.find_one({"email": args["email"]})
