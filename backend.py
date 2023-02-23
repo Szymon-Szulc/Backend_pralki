@@ -9,10 +9,19 @@ from flask import Flask, request
 from flask_mail import Mail, Message
 from flask_restful import Resource, Api, reqparse
 from pymongo import MongoClient
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dev = True
+
+load_dotenv(join(dirname(__file__), '.env'))
 
 key = "QU5HYBscKYaDlIuFKWKnlOqhWNFVbCaBADs6ZPBsQVBFytabJaP8txjCvLVHrJJ"
 
-client = MongoClient("mongodb://localhost:27017")
+client = MongoClient(os.environ.get("DATABASE_LINK"))
+print(os.environ.get("DATABASE_LINK"))
+print(client)
 db = client.laundry
 ph = argon2.PasswordHasher()
 app = Flask(__name__)
@@ -66,7 +75,7 @@ def generate_user_jwt(user_id):
 # Users
 class Register(Resource):
     @staticmethod
-    def code_gen(length=6, dev=True):
+    def code_gen(length=6, dev=False):
         code = ""
         if dev is True:
             return "111111"
@@ -108,7 +117,7 @@ class Register(Resource):
         # jeśli znaleziono użytkownika
         if db.users.find_one({"email": args["email"]}):
             return get_message("Użytkownik już istnieje!"), 400
-        code = self.code_gen(dev=False)
+        code = self.code_gen(dev)
         user = {
             "name": args["name"].title(),
             "email": args["email"],
@@ -161,14 +170,19 @@ class VerifyEmail(Resource):
 class CheckEmail(Resource):
     def get(self):
         pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        pass_pattern = r"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,32}$"
         args = request.args
-        result = re.match(pattern, args["email"])
+        email = args["email"].lower()
+        result = re.match(pattern, email)
         if not result:
             return get_message("Niepoprawny mail"), 400
-        user = db.users.find_one({"email": args["email"]})
+        result_pass = re.match(pass_pattern, args["password"])
+        if not result_pass and os.environ.get("DEV") is not True:
+            return get_message("Nieodpowiednie hasło"), 422
+        user = db.users.find_one({"email": email})
         if user:
             return get_message("Użytkownik już istnieje"), 200
-        user = db.cashe_users.find_one({"email": args["email"]})
+        user = db.cashe_users.find_one({"email": email})
         if user:
             return get_message("Użytkownik nie potwierdził maila"), 200
         return get_message("Nie znaleziono użytkownika"), 404
@@ -194,8 +208,9 @@ class Login(Resource):
 
     def get(self):
         args = request.args
-        if valid_password(args["password"], args["email"]):
-            user = db.users.find_one({"email": args["email"]})
+        email = args["email"].lower()
+        if valid_password(args["password"], email):
+            user = db.users.find_one({"email": email})
             token = generate_user_jwt(user["uid"])
             return {"token": token, "username": user["name"],
                     "dorm_name": db.dorms.find_one({"did": user["did"]})["name"]}, 200
@@ -207,15 +222,15 @@ class SendCode(Resource):
     def send_mail(self, args, code, name):
         with app.app_context():
             msg = Message("Resetowanie Hasła", sender="no-reply@smartdorm.app", recipients=[args["email"]])
-            msg.html =  " <body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'>"\
-                            f"<h2 style='color: black'>Hej, {name}</h2>"\
-                            "<p>Otrzymujesz ten mail, ponieważ poprosiłeś o zresetowanie hasła w aplikacji SmartDorm " \
-                        "Laundry. Aby ustawić nowe hasło, prosimy o wpisanie poniższego kodu w aplikacji i " \
-                        "postępowanie zgodnie z instrukcjami:</p>"\
-                            f"<p style='color: black'><strong>{code}</strong></p>"\
-                            "<p>Jeśli nie prosiłeś o resetowanie hasła, prosimy o zignorowanie tego maila.</p>"\
-                            "<p>Pozdrawiamy,<br>Zespół SmartDorm Laundry</p>"\
-                          "</body>"
+            msg.html = " <body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'>" \
+                       f"<h2 style='color: black'>Hej, {name}</h2>" \
+                       "<p>Otrzymujesz ten mail, ponieważ poprosiłeś o zresetowanie hasła w aplikacji SmartDorm " \
+                       "Laundry. Aby ustawić nowe hasło, prosimy o wpisanie poniższego kodu w aplikacji i " \
+                       "postępowanie zgodnie z instrukcjami:</p>" \
+                       f"<p style='color: black'><strong>{code}</strong></p>" \
+                       "<p>Jeśli nie prosiłeś o resetowanie hasła, prosimy o zignorowanie tego maila.</p>" \
+                       "<p>Pozdrawiamy,<br>Zespół SmartDorm Laundry</p>" \
+                       "</body>"
             mail.send(msg)
             return
 
@@ -223,12 +238,13 @@ class SendCode(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument("email", required=True, help="Email cannot be blank!")
         args = parser.parse_args(strict=True)
-        code = Register().code_gen(dev=False)
+        email = args["email"].lower()
+        code = Register().code_gen(dev)
         # code = "111111"
-        user = db.users.find_one({"email": args["email"]})
+        user = db.users.find_one({"email": email})
         if not user:
-            return {"message": {"name": "Nie znaleziono takiego użytkownika"}}, 404
-        db.users.update_one({"email": args["email"]}, {"$set": {"code": code, "verify": False, "forget": True}})
+            return get_message("Nie znaleziono takiego użytkownika"), 404
+        db.users.update_one({"email": email}, {"$set": {"code": code, "verify": False, "forget": True}})
         a = threading.Thread(target=self.send_mail, args=[args, code, user["name"]])
         a.daemon = False
         a.start()
@@ -248,7 +264,7 @@ class VerifyCode(Resource):
         print(code, user["code"])
         if not user["code"] == code:
             db.users.update_one({"email": args["email"]}, {"$set": {"verify": True}})
-            return get_message("Kod jest nieprawidłowy"), 400
+            return get_message("Kod jest nie prawidłowy"), 400
 
         return get_message("Kod jest prawidłowy"), 200
 
@@ -259,13 +275,15 @@ class ResetPassword(Resource):
         parser.add_argument("email", required=True, help="Email cannot be blank!")
         parser.add_argument("new_password", required=True, help="New password cannot be blank!")
         args = parser.parse_args(strict=True)
-        user = db.users.find_one({"email": args["email"], "verify": True})
+        user = db.users.find_one({"email": args["email"].lower(), "verify": True})
         if not user:
             return get_message("Nie znaleziono użytkownika"), 404
         new_hash = ph.hash(args["new_password"])
-        db.users.update_one({"email": args["email"], "verify":True}, {"$set": {"verify": False, "forget": False, "code": None, "password": new_hash, "debugpass": args["new_password"]}})
-
+        db.users.update_one({"email": args["email"].lower(), "verify": True}, {
+            "$set": {"verify": False, "forget": False, "code": None, "password": new_hash,
+                     "debugpass": args["new_password"]}})
         print(user)
+        return get_message("Hasło zostało zmienione"), 200
 
 
 # Machines
@@ -275,19 +293,65 @@ class Machine(Resource):
         status = []
         user_id = decode_user_jwt(args['token'])
         if not user_id:
-            return get_message("Użytkownik nie istnieje"), 401
+            return get_message("Błędny token"), 401
         dorm_id = db.users.find_one({'uid': user_id})['did']
         machines = db.machines.find({'did': dorm_id})
         for machine in machines:
-            status.append({"turn_on": machine["turn_on"], "name": machine["name"], "type": machine["type"]})
+            status.append({"turn_on": machine["turn_on"], "name": machine["name"].title(), "type": machine["type"]})
         return {"machines": status}, 200
 
 
 class Duck(Resource):
     def get(self):
-        return {"duck": "kwa kwa 🦆"}
+        return {"duck": "kwa kwa 🦆", "version": "0.5"}
 
 
+class AddDorm(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("token")
+        parser.add_argument("dorm-name")
+        parser.add_argument("dorm-code")
+        args = parser.parse_args()
+        if not args["token"] == os.environ.get("API_KEY"):
+            return get_message("Token jest nieprawidłowy"), 401
+        try:
+            dorm_id = db.dorms.find_one(filter={}, sort=list({"did": -1}.items()))["did"] + 1
+        except TypeError:
+            dorm_id = 1
+        dorm = {
+            "did": dorm_id,
+            "name": args["dorm-name"],
+            "code": args["dorm-code"]
+        }
+        db.dorms.insert_one(dorm)
+        return get_message("Akademik dodany!"), 201
+
+
+class GetApiKey(Resource):
+    def send_mail(self, message):
+        with app.app_context():
+            msg = Message("Admin Code", sender="no-reply@smartdorm.app", recipients=["admin@smartdorm.app"])
+            msg.body = message
+            mail.send(msg)
+            return
+
+    def get(self):
+        args = request.args
+        if not (args["email"].lower() == "admin@smartdorm.app" and args["password"] == "DmsXGNQtvj"):
+            a = threading.Thread(target=self.send_mail,
+                                 args=[f"Wykryto próbę pozyskania klucza api, użyty adres Email: {args['email']}"])
+            a.daemon = False
+            a.start()
+            return get_message("Błędne dane logowania, informacja została wysłana do administracji"), 401
+        a = threading.Thread(target=self.send_mail, args=[f"Twój klucz api to: {os.environ.get('API_KEY')}"])
+        a.daemon = False
+        a.start()
+        return get_message("Mail wysłany!"), 200
+
+
+api.add_resource(GetApiKey, "/api")
+api.add_resource(AddDorm, "/dorms")
 api.add_resource(CheckEmail, "/check")
 api.add_resource(SendCode, "/password-reset/send-code")
 api.add_resource(VerifyCode, "/password-reset/<string:code>")
@@ -297,7 +361,7 @@ api.add_resource(Register, "/users")
 api.add_resource(VerifyEmail, "/users")
 api.add_resource(JoinDorm, "/users")
 api.add_resource(Machine, "/machines")
-api.add_resource(Duck, "/ducks")
+api.add_resource(Duck, "/ducks", "/duck", "/test")
 
 
 def run_server():
@@ -352,6 +416,9 @@ if __name__ == '__main__':
     server = threading.Thread(target=run_server)
     sockets = threading.Thread(target=check_sockets)
     sockets_ip = threading.Thread(target=check_socket_ip)
-    server.start()
+    print(os.environ.get("DEV"))
+    if os.environ.get("DEV") == "True":
+        server.start()
+        print("test")
     # sockets.start()
     # sockets_ip.start()
