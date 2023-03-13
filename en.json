@@ -1,0 +1,50 @@
+{
+  "Akademik 2":{
+    "I can't open the washing machine door":{
+      "header":"Click the button with the number of the washing machine three times and you will get 20 seconds for free. (You can turn this option on three times).",
+      "video_link":"https://www.youtube.com/watch?v=xvFZjo5PgG0",
+      "question":"Is the washing machine continuing the washing program?",
+      "yes":{
+        "header":"The washing machine has not finished the washing program. Buy more time.",
+        "video_link":"https://www.youtube.com/watch?v=xvFZjo5PgG0",
+        "question":"Did this solve the problem?",
+        "yes":"ok",
+        "no":"contact"
+      },
+      "no":{
+        "header":"Turn on the washing machine and check if there is a red key icon on the washing machine display.",
+        "video_link":"https://www.youtube.com/watch?v=xvFZjo5PgG0",
+        "question":"Is there a red key icon on the washing machine display?",
+        "yes":{
+          "header":"Wait a moment for the washing machine to unlock the door.",
+          "video_link":"https://www.youtube.com/watch?v=xvFZjo5PgG0",
+          "question":"Did this solve the problem?",
+          "yes":"ok",
+          "no":{
+            "header":"Push the washing machine door with your right hand and pull the handle with your left hand.",
+            "video_link":"https://www.youtube.com/watch?v=xvFZjo5PgG0",
+            "question": "Did you open the washing machine door?",
+            "yes":"ok",
+            "no":{
+              "header":"Probably the handle is broken. Watch the video on how to open the door with a special emergency method.",
+              "video_link":"https://www.youtube.com/watch?v=xvFZjo5PgG0",
+              "question":""
+            }
+          }
+        },
+        "no":{
+          "header":"Push the washing machine door with your right hand and pull the handle with your left hand.",
+          "video_link":"https://www.youtube.com/watch?v=xvFZjo5PgG0",
+          "question": "Did you open the washing machine door?",
+          "yes":"ok",
+          "no":{
+            "header":"Probably the handle is broken. Watch the video on how to open the door with a special emergency method.",
+            "video_link":"https://www.youtube.com/watch?v=xvFZjo5PgG0",
+            "question":""
+          }
+        }
+
+      }
+    }
+  }
+}
