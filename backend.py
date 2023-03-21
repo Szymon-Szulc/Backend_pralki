@@ -385,7 +385,7 @@ api.add_resource(Duck, "/ducks", "/duck", "/test")
 
 
 def run_server():
-    app.run(host="0.0.0.0", port=3001)
+    app.run(host="0.0.0.0", port=3000)
 
 
 def check_sockets():
