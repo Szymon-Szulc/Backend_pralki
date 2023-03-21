@@ -78,7 +78,7 @@ def generate_user_jwt(user_id):
 # Users
 class Register(Resource):
     @staticmethod
-    def code_gen(length=6, dev=False):
+    def code_gen(length=6, local_dev=False):
         code = ""
         if dev is True:
             return "111111"
