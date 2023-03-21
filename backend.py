@@ -1,3 +1,4 @@
+import json
 import random
 import threading
 import re
@@ -5,15 +6,16 @@ from time import sleep
 import argon2
 import jwt
 import tinytuya as tt
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_mail import Mail, Message
 from flask_restful import Resource, Api, reqparse
 from pymongo import MongoClient
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+from flask_cors import CORS
 
-dev = True
+dev = os.environ.get("DEV")
 
 load_dotenv(join(dirname(__file__), '.env'))
 
@@ -33,6 +35,7 @@ app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = 'no-reply@smartdorm.app'
 app.config['MAIL_PASSWORD'] = 'szymon80012'
 mail = Mail(app)
+CORS(app)
 api = Api(app)
 
 
@@ -253,7 +256,7 @@ class SendCode(Resource):
 
 
 class VerifyCode(Resource):
-    def get(self, code):
+    def get(self):
         args = request.args
         user = db.users.find_one({"email": args["email"]})
         if not user:
@@ -261,8 +264,8 @@ class VerifyCode(Resource):
 
         if user["forget"] == False:
             return get_message("Nie znaleziono takiego użytkownika"), 404
-        print(code, user["code"])
-        if not user["code"] == code:
+        print(args['code'], user["code"])
+        if not user["code"] == args['code']:
             db.users.update_one({"email": args["email"]}, {"$set": {"verify": True}})
             return get_message("Kod jest nie prawidłowy"), 400
 
@@ -303,7 +306,7 @@ class Machine(Resource):
 
 class Duck(Resource):
     def get(self):
-        return {"duck": "kwa kwa 🦆", "version": "0.5"}
+        return {"duck": "kwa kwa 🦆", "version": "0.6"}
 
 
 class AddDorm(Resource):
@@ -312,6 +315,7 @@ class AddDorm(Resource):
         parser.add_argument("token")
         parser.add_argument("dorm-name")
         parser.add_argument("dorm-code")
+        parser.add_argument("dorm-location")
         args = parser.parse_args()
         if not args["token"] == os.environ.get("API_KEY"):
             return get_message("Token jest nieprawidłowy"), 401
@@ -322,7 +326,8 @@ class AddDorm(Resource):
         dorm = {
             "did": dorm_id,
             "name": args["dorm-name"],
-            "code": args["dorm-code"]
+            "code": args["dorm-code"],
+            "location": args["dorm-location"]
         }
         db.dorms.insert_one(dorm)
         return get_message("Akademik dodany!"), 201
@@ -350,11 +355,26 @@ class GetApiKey(Resource):
         return get_message("Mail wysłany!"), 200
 
 
+class GetRaportList(Resource):
+    def get(self):
+        args = request.args
+        user_id = decode_user_jwt(args['token'])
+        if not user_id:
+            return get_message("Błędny token"), 401
+        dorm_id = db.users.find_one({"uid": user_id})['did']
+        dorm_name = db.dorms.find_one({"did": dorm_id})['name']
+        with open(f"{args['lang']}.json", "r") as f:
+            data = json.load(f)
+            print(data[dorm_name])
+            return data[dorm_name], 200
+
+
+api.add_resource(GetRaportList, "/raport")
 api.add_resource(GetApiKey, "/api")
 api.add_resource(AddDorm, "/dorms")
 api.add_resource(CheckEmail, "/check")
 api.add_resource(SendCode, "/password-reset/send-code")
-api.add_resource(VerifyCode, "/password-reset/<string:code>")
+api.add_resource(VerifyCode, "/password-reset")
 api.add_resource(ResetPassword, "/password-reset")
 api.add_resource(Login, "/users")
 api.add_resource(Register, "/users")
@@ -365,7 +385,7 @@ api.add_resource(Duck, "/ducks", "/duck", "/test")
 
 
 def run_server():
-    app.run(host="0.0.0.0", port=3000)
+    app.run(host="0.0.0.0", port=3001)
 
 
 def check_sockets():
