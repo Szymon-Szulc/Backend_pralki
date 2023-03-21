@@ -1,6 +1,6 @@
 # Dokumentacja API
 ***
-## Check — Sprawdzanie maila i hasła
+# Check — Sprawdzanie maila i hasła
 ### URL
 `GET /check?email=:email&password=:password`
 ### Parametry
@@ -23,7 +23,7 @@
 | 200            | Błąd - Adres email NIE jest dostępny                       |
 | 400            | Błąd - Adres email NIE jest w prawidłowym formacie         |
 | 422            | Błąd - Hasło jest niepoprawne                              |
-## Users — Rejestracja użytkownika
+# Users — Rejestracja użytkownika
 ### URL
 `POST /users`
 ### Parametry
@@ -56,7 +56,7 @@
 | 409            | Błąd - Użytkownik nie potwierdził adresu E-mail |
 ### Informacje
 Ta funkcja powoduje wysłanie na podany adres E-mail kodu (6 cyfr) weryfikacyjnego
-## Users - Weryfikacja adresu e-mail
+# Users - Weryfikacja adresu e-mail
 ### URL
 `PUT /users`
 ### Parametry
@@ -83,7 +83,7 @@ Ta funkcja powoduje wysłanie na podany adres E-mail kodu (6 cyfr) weryfikacyjne
 | 200            | Sukces - Użytkownik zweryfikowany           |
 | 404            | Błąd - Użytkownik NIE istnieje              |
 | 400            | Błąd - Podany kod weryfikacyjny jest błędny |
-## Users — Dodawanie użytkownika do akademika
+# Users — Dodawanie użytkownika do akademika
 ### URL
 `PATCH /users`
 ### Parametry
@@ -113,7 +113,7 @@ Ta funkcja powoduje wysłanie na podany adres E-mail kodu (6 cyfr) weryfikacyjne
 
 ### Autoryzacja
 Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z weryfikacji adresu e-mail albo logowania
-## Users — Logowanie
+# Users — Logowanie
 ### URL
 `GET /users?email=:email&password=:password`
 ### Parametry
@@ -134,7 +134,7 @@ Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z
 |----------------|--------------------------------------------------|
 | 200            | Sukces - Dane autoryzacyjne poprawne             |
 | 400            | Błąd - Adres e-mail albo hasło są NIE prawidłowe |
-## Password-reset — Wysyłanie kodu weryfikacyjnego
+# Password-reset — Wysyłanie kodu weryfikacyjnego
 ### URL
 `PATCH /password-reset/send-code`
 ### Parametry
@@ -160,7 +160,7 @@ Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z
 |----------------|--------------------------------------------------------|
 | 200            | Sukces - E-mail z kodem został wysłany                 |
 | 404            | Błąd - Nie znaleziono użytkownika z tym adresem e-mail |
-## Password-reset — Weryfikacja kodu resetu hasła
+# Password-reset — Weryfikacja kodu resetu hasła
 ### URL
 `GET /password-reset/?email=:email&code=:code`
 ### Parametry
@@ -182,7 +182,7 @@ Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z
 | 200            | Sukces - Kod prawidłowy                    |
 | 404            | Błąd - Nie znaleziono użytkownika          |
 | 400            | Błąd - Podany kod weryfikacyjny jest błędy |
-## Password-reset — Ustawianie nowego hasła
+# Password-reset — Ustawianie nowego hasła
 ### URL
 `PATCH /password-reset`
 ### Parametry
@@ -210,7 +210,7 @@ Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z
 |----------------|-----------------------------------|
 | 200            | Sukces - Hasło zostało zmienione  |
 | 404            | Błąd - Nie znaleziono użytkownika |
-## Machines — Listowanie maszyn
+# Machines — Listowanie maszyn
 ### URL
 `GET /machines?token=:token`
 ### Parametry
@@ -246,7 +246,7 @@ Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z
 | 401            | Błąd - Błędny token autoryzacyjny |
 ### Autoryzacja
 Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z weryfikacji adresu e-mail albo logowania
-## Dorms — Dodawanie akademika
+# Dorms — Dodawanie akademika
 ### URL
 `POST /dorms`
 ### Parametry
@@ -278,7 +278,7 @@ Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z
 | 401            | Błąd - Błędny token      |
 ### Autoryzacja
 Aby korzystać z tego endpointu, należy pozyskać `key` można go pozyskać z `GET /api`
-## Api — Pozyskanie api key
+# Api — Pozyskanie api key
 ### URL
 `GET /api?email=:email&password=:password`
 ### Parametry
@@ -300,7 +300,7 @@ Aby korzystać z tego endpointu, należy pozyskać `key` można go pozyskać z `
 | 200            | Sukces - Mail wysłany, klucz api jest na mailu                                     |
 | 401            | Błąd - Dane są NIE prawidłowe, próba zalogowania została wysłana do administratora |
 
-## Raport — Uzyskiwanie listy raport
+# Raport — Uzyskiwanie listy raport
 ### URL
 `GET /raport?token=:token?lang=:lang`
 ### Parametry
