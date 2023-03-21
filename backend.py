@@ -175,12 +175,12 @@ class CheckEmail(Resource):
         pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         pass_pattern = r"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,32}$"
         args = request.args
-        email = args["email"].lower()
+        email = args["email"].lower().strip()
         result = re.match(pattern, email)
         if not result:
             return get_message("Niepoprawny mail"), 400
         result_pass = re.match(pass_pattern, args["password"])
-        if not result_pass and os.environ.get("DEV") is not True:
+        if not result_pass and dev is False:
             return get_message("Nieodpowiednie hasło"), 422
         user = db.users.find_one({"email": email})
         if user:
