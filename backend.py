@@ -120,7 +120,7 @@ class Register(Resource):
         # jeśli znaleziono użytkownika
         if db.users.find_one({"email": args["email"]}):
             return get_message("Użytkownik już istnieje!"), 400
-        code = self.code_gen(dev)
+        code = self.code_gen()
         user = {
             "name": args["name"].title(),
             "email": args["email"],
@@ -242,7 +242,7 @@ class SendCode(Resource):
         parser.add_argument("email", required=True, help="Email cannot be blank!")
         args = parser.parse_args(strict=True)
         email = args["email"].lower()
-        code = Register().code_gen(dev)
+        code = Register().code_gen()
         # code = "111111"
         user = db.users.find_one({"email": email})
         if not user:
