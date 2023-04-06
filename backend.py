@@ -15,29 +15,9 @@ from os.path import join, dirname
 from dotenv import load_dotenv
 from flask_cors import CORS
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # key = "225780186704"
-
-
-def send_push_notification(token, message, server_key):
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'key={server_key}',
-    }
-    payload = {
-        'to': token,
-        'notification': {
-            'title': 'Tytuł powiadomienia',
-            'body': message,
-        },
-        'data': {
-            'exampleData': 'Przykładowe dane',
-        },
-    }
-    response = requests.post('https://fcm.googleapis.com/fcm/send', headers=headers, json=payload)
-    return response
-
 
 dev = os.environ.get("DEV")
 
@@ -94,6 +74,24 @@ def decode_user_jwt(token):
         return False
 
 
+def send_mail(email, key_mail, args1, args2, lang='pl'):
+    with open('mail_{}.json'.format(lang), encoding="UTF-8") as f:
+        data = json.load(f)
+    with app.app_context():
+        msg = Message(data[key_mail]['title'], sender="no-reply@smartdorm.app",
+                      recipients=[email])
+        msg.html = data[key_mail]['msg'].format(args1, args2)
+        mail.send(msg)
+        return
+
+def code_gen(length=6):
+    code = ""
+    if dev is True:
+        return "111111"
+    for i in range(length):
+        code += str(random.choice(range(0, 9)))
+    return code
+
 def generate_user_jwt(user_id):
     payload = {'uid': user_id}
     return jwt.encode(payload, key)
@@ -101,34 +99,7 @@ def generate_user_jwt(user_id):
 
 # Users
 class Register(Resource):
-    @staticmethod
-    def code_gen(length=6, local_dev=False):
-        code = ""
-        if dev is True:
-            return "111111"
-        for i in range(length):
-            code += str(random.choice(range(0, 9)))
-        return code
 
-    @staticmethod
-    def send_mail(args, code, name):
-        with app.app_context():
-            msg = Message("Potwierdzenie rejestracji w aplikacji SmartDorm Laundry", sender="no-reply@smartdorm.app",
-                          recipients=[args["email"]])
-            msg.html = "<body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'>" \
-                       f"<h2 style='color: black'>Hej, {name.title()}</h2>" \
-                       "<p>Dziękujemy za rejestrację w aplikacji SmartDorm Laundry. Aby dokończyć proces " \
-                       "rejestracji, prosimy o wpisanie poniższego sześciocyfrowego kodu weryfikacyjnego w " \
-                       "odpowiednie pole na ekranie rejestracji:</p>" \
-                       f"<p>Kod weryfikacyjny: <strong style='color: black'>{code}</strong></p>" \
-                       "<p>Prosimy o nie udostępnianie tego kodu nikomu, w celu zabezpieczenia Twojego konta.</p>" \
-                       "<p>Jeśli nie rejestrowałeś się w aplikacji SmartDorm Laundry, prosimy o zignorowanie tego " \
-                       "maila.</p>" \
-                       "<p>Dziękujemy za korzystanie z naszej aplikacji.</p>" \
-                       "<p>Pozdrawiamy,<br>Zespół SmartDorm</p>" \
-                       "</body>"
-            mail.send(msg)
-            return
 
     def post(self):
         parser = reqparse.RequestParser()
@@ -145,7 +116,7 @@ class Register(Resource):
         # jeśli znaleziono użytkownika
         if db.users.find_one({"email": email}):
             return get_message("Użytkownik już istnieje!"), 400
-        code = self.code_gen()
+        code = code_gen()
         user = {
             "name": args["name"].title(),
             "email": email,
@@ -155,7 +126,7 @@ class Register(Resource):
         }
         db.cashe_users.insert_one(user)
 
-        t = threading.Thread(target=self.send_mail, args=[args, code, args["name"]])
+        t = threading.Thread(target=send_mail, args=[email, "register_verify", args["name"].title(), code])
         t.daemon = False
         t.start()
         return get_message("Użytkownik utworzony!"), 201
@@ -247,33 +218,18 @@ class Login(Resource):
 
 
 class SendCode(Resource):
-    def send_mail(self, args, code, name):
-        with app.app_context():
-            msg = Message("Resetowanie Hasła", sender="no-reply@smartdorm.app", recipients=[args["email"]])
-            msg.html = " <body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'>" \
-                       f"<h2 style='color: black'>Hej, {name}</h2>" \
-                       "<p>Otrzymujesz ten mail, ponieważ poprosiłeś o zresetowanie hasła w aplikacji SmartDorm " \
-                       "Laundry. Aby ustawić nowe hasło, prosimy o wpisanie poniższego kodu w aplikacji i " \
-                       "postępowanie zgodnie z instrukcjami:</p>" \
-                       f"<p style='color: black'><strong>{code}</strong></p>" \
-                       "<p>Jeśli nie prosiłeś o resetowanie hasła, prosimy o zignorowanie tego maila.</p>" \
-                       "<p>Pozdrawiamy,<br>Zespół SmartDorm Laundry</p>" \
-                       "</body>"
-            mail.send(msg)
-            return
-
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument("email", required=True, help="Email cannot be blank!")
         args = parser.parse_args(strict=True)
-        email = args["email"].lower()
-        code = Register().code_gen()
+        email = args["email"].lower().strip()
+        code = code_gen()
         # code = "111111"
         user = db.users.find_one({"email": email})
         if not user:
             return get_message("Nie znaleziono takiego użytkownika"), 404
         db.users.update_one({"email": email}, {"$set": {"code": code, "verify": False, "forget": True}})
-        a = threading.Thread(target=self.send_mail, args=[args, code, user["name"]])
+        a = threading.Thread(target=send_mail, args=[email, "reset_password", user["name"].title(), code])
         a.daemon = False
         a.start()
         # self.send_mail(args, code, user["name"])
@@ -426,10 +382,19 @@ class GetCountUsers(Resource):
             return get_message("Token jest nieprawidłowy"), 401
         dorms = db.dorms.find({})
         out = []
+        date_threshold = datetime.now() - timedelta(days=30)
+        print(date_threshold)
         for dorm in dorms:
             users_count = db.users.count_documents({"did": dorm["did"]})
-            print(users_count)
-            out.append({"name": dorm['name'], "count": users_count})
+            users_inactive = db.users.count_documents({"did": dorm["did"], 'last-login-time': {'$lte': date_threshold}})
+            users_active = db.users.count_documents({'did': dorm['did'], 'last-login-time': {'$gt': date_threshold}})
+            out.append(
+                {
+                    "name": dorm['name'],
+                    "count": users_count,
+                    "inactive": users_inactive,
+                    "active": users_active
+                 })
         return out
 
 
