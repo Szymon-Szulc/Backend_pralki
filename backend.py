@@ -6,7 +6,7 @@ from time import sleep
 import argon2
 import jwt
 import tinytuya as tt
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from flask_mail import Mail, Message
 from flask_restful import Resource, Api, reqparse
 from pymongo import MongoClient
@@ -14,6 +14,30 @@ import os
 from os.path import join, dirname
 from dotenv import load_dotenv
 from flask_cors import CORS
+import requests
+from datetime import datetime
+
+# key = "225780186704"
+
+
+def send_push_notification(token, message, server_key):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'key={server_key}',
+    }
+    payload = {
+        'to': token,
+        'notification': {
+            'title': 'Tytuł powiadomienia',
+            'body': message,
+        },
+        'data': {
+            'exampleData': 'Przykładowe dane',
+        },
+    }
+    response = requests.post('https://fcm.googleapis.com/fcm/send', headers=headers, json=payload)
+    return response
+
 
 dev = os.environ.get("DEV")
 
@@ -114,16 +138,16 @@ class Register(Resource):
         args = parser.parse_args(strict=True)
         # hashowanie hasła
         hash_password = ph.hash(args["password"])
-        # jeśli znaleziono użytkownika który nie potwierdził maila
-        if db.cashe_users.find_one({"email": args['email']}):
+        # jeśli znaleziono użytkownika, który nie potwierdził maila
+        if db.cashe_users.find_one({"email": args['email'].lower()}):
             return get_message("Użytkownik nie potwierdził emaila!"), 409
         # jeśli znaleziono użytkownika
-        if db.users.find_one({"email": args["email"]}):
+        if db.users.find_one({"email": args["email"].lower()}):
             return get_message("Użytkownik już istnieje!"), 400
         code = self.code_gen()
         user = {
             "name": args["name"].title(),
-            "email": args["email"],
+            "email": args["email"].lower(),
             "password": hash_password,
             "DEBUGPpass": args["password"],
             "verify_code": code
@@ -295,8 +319,11 @@ class Machine(Resource):
         args = request.args
         status = []
         user_id = decode_user_jwt(args['token'])
+        # dt = args["device_token"]
         if not user_id:
             return get_message("Błędny token"), 401
+        db.users.update_one({"uid": user_id}, {"$set": {"last-login-time": datetime.today()}})
+        # db.users.update_one({"uid": user_id}, {"$set": {"dt": dt}})
         dorm_id = db.users.find_one({'uid': user_id})['did']
         machines = db.machines.find({'did': dorm_id})
         for machine in machines:
@@ -304,10 +331,26 @@ class Machine(Resource):
         return {"machines": status}, 200
 
 
+class GetRaportList(Resource):
+    def get(self):
+        args = request.args
+        user_id = decode_user_jwt(args['token'])
+        if not user_id:
+            return get_message("Błędny token"), 401
+        dorm_id = db.users.find_one({"uid": user_id})['did']
+        dorm_name = db.dorms.find_one({"did": dorm_id})['name']
+        with open(f"{args['lang']}.json", "r") as f:
+            data = json.load(f)
+            print(data[dorm_name])
+            return data[dorm_name], 200
+
+
 class Duck(Resource):
     def get(self):
-        return {"duck": "kwa kwa 🦆", "version": "0.6"}
+        return {"duck": "kwa kwa 🦆", "version": "0.7"}
 
+
+# Panel Admina
 
 class AddDorm(Resource):
     def post(self):
@@ -355,23 +398,73 @@ class GetApiKey(Resource):
         return get_message("Mail wysłany!"), 200
 
 
-class GetRaportList(Resource):
+class GetUsers(Resource):
     def get(self):
         args = request.args
-        user_id = decode_user_jwt(args['token'])
-        if not user_id:
-            return get_message("Błędny token"), 401
-        dorm_id = db.users.find_one({"uid": user_id})['did']
-        dorm_name = db.dorms.find_one({"did": dorm_id})['name']
-        with open(f"{args['lang']}.json", "r") as f:
-            data = json.load(f)
-            print(data[dorm_name])
-            return data[dorm_name], 200
+        if not args["token"] == os.environ.get("API_KEY"):
+            return get_message("Token jest nieprawidłowy"), 401
+        out = []
+        users = db.users.find({})
+        for user in users:
+            u = {
+                "id": user["uid"],
+                "name": user["name"].title(),
+                "email": user["email"],
+                "dorm": db.dorms.find_one({"did": user['did']})["name"],
+                "city": db.dorms.find_one({"did": user['did']})["location"],
+                "last-login": (datetime.today() - user["last-login-time"]).days
+            }
+            out.append(u)
+        return out
+
+
+class GetCountUsers(Resource):
+    def get(self):
+        args = request.args
+        if not args["token"] == os.environ.get("API_KEY"):
+            return get_message("Token jest nieprawidłowy"), 401
+        dorms = db.dorms.find({})
+        out = []
+        for dorm in dorms:
+            users_count = db.users.count_documents({"did": dorm["did"]})
+            print(users_count)
+            out.append({"name": dorm['name'], "count": users_count})
+        return out
+
+
+class AddMachineProfile(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("token")
+        parser.add_argument("name")
+        parser.add_argument("model")
+        parser.add_argument("type")
+
+        # type 0 = pralka | type 1 = suszarka | type 2 = płatność
+        args = parser.parse_args()
+        print(args)
+
+        if not args["token"] == os.environ.get("API_KEY"):
+            return get_message("Token jest nieprawidłowy"), 401
+        try:
+            ID = db.machine_profiles.find_one(filter={}, sort=list({"id": -1}.items()))['id'] + 1
+        except TypeError:
+            ID = 1
+        profile = {
+            "id": ID,
+            "name": args["name"],
+            "model": args["model"],
+            "type": args["type"]
+        }
+        db.machine_profiles.insert_one(profile)
+        return 200
 
 
 api.add_resource(GetRaportList, "/raport")
+api.add_resource(GetCountUsers, "/admin/dorms/count")
 api.add_resource(GetApiKey, "/api")
-api.add_resource(AddDorm, "/dorms")
+api.add_resource(AddDorm, "/admin/dorms")
+api.add_resource(GetUsers, "/admin/users")
 api.add_resource(CheckEmail, "/check")
 api.add_resource(SendCode, "/password-reset/send-code")
 api.add_resource(VerifyCode, "/password-reset")
@@ -381,6 +474,7 @@ api.add_resource(Register, "/users")
 api.add_resource(VerifyEmail, "/users")
 api.add_resource(JoinDorm, "/users")
 api.add_resource(Machine, "/machines")
+api.add_resource(AddMachineProfile, "/admin/machines")
 api.add_resource(Duck, "/ducks", "/duck", "/test")
 
 
@@ -439,6 +533,3 @@ if __name__ == '__main__':
     print(os.environ.get("DEV"))
     if os.environ.get("DEV") == "True":
         server.start()
-        print("test")
-    # sockets.start()
-    # sockets_ip.start()
