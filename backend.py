@@ -136,18 +136,19 @@ class Register(Resource):
         parser.add_argument("password", required=True, help="Password cannot be blank!")
         parser.add_argument("name", required=True, help="Name cannot be blank!")
         args = parser.parse_args(strict=True)
+        email = args["email"].lower().strip()
         # hashowanie hasła
         hash_password = ph.hash(args["password"])
         # jeśli znaleziono użytkownika, który nie potwierdził maila
-        if db.cashe_users.find_one({"email": args['email'].lower()}):
+        if db.cashe_users.find_one({"email": email}):
             return get_message("Użytkownik nie potwierdził emaila!"), 409
         # jeśli znaleziono użytkownika
-        if db.users.find_one({"email": args["email"].lower()}):
+        if db.users.find_one({"email": email}):
             return get_message("Użytkownik już istnieje!"), 400
         code = self.code_gen()
         user = {
             "name": args["name"].title(),
-            "email": args["email"].lower(),
+            "email": email,
             "password": hash_password,
             "DEBUGPpass": args["password"],
             "verify_code": code
@@ -235,7 +236,7 @@ class Login(Resource):
 
     def get(self):
         args = request.args
-        email = args["email"].lower()
+        email = args["email"].lower().strip()
         if valid_password(args["password"], email):
             user = db.users.find_one({"email": email})
             token = generate_user_jwt(user["uid"])
