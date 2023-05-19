@@ -84,6 +84,7 @@ def send_mail(email, key_mail, args1, args2, lang='pl'):
         mail.send(msg)
         return
 
+
 def code_gen(length=6):
     code = ""
     if dev is True:
@@ -91,6 +92,7 @@ def code_gen(length=6):
     for i in range(length):
         code += str(random.choice(range(0, 9)))
     return code
+
 
 def generate_user_jwt(user_id):
     payload = {'uid': user_id}
@@ -284,7 +286,8 @@ class Machine(Resource):
         dorm_id = db.users.find_one({'uid': user_id})['did']
         machines = db.machines.find({'did': dorm_id})
         for machine in machines:
-            status.append({"turn_on": machine["turn_on"], "name": machine["name"].title(), "type": machine["type"]})
+            status.append({"turn_on": machine["turn_on"], "name": machine["name"].title(), "type": machine["type"],
+                           "lock": machine['lock']})
         return {"machines": status}, 200
 
 
@@ -420,11 +423,33 @@ class AddMachineProfile(Resource):
             "id": ID,
             "name": args["name"],
             "model": args["model"],
-            "type": args["type"]
+            "type": args["type"],
         }
         db.machine_profiles.insert_one(profile)
         return 200
 
+
+class GetMachinesProfiles(Resource):
+    def get(self):
+        args = request.args
+
+
+class LockMachine(Resource):
+    def patch(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument("token", required=True, help="Token cannot be blank!")
+        parser.add_argument("machine", required=True, help="Machine cannot be blank!")
+        args = parser.parse_args()
+        user_id = decode_user_jwt(args['token'])
+        if not user_id:
+            return get_message("Błędny token"), 401
+        did = db.users.find_one({"uid": user_id})["did"]
+        if db.machines.find_one({"did": did, "name": args["machine"]})['lock'] == True:
+            return get_message("urządzenie jest już zablokowane"), 409
+        db.machines.update_one({"did": did, "name": args["machine"]}, {'$set': {
+            "lock": True
+        }})
+        return get_message("urządzenie zablokowane"), 201
 
 api.add_resource(GetRaportList, "/raport")
 api.add_resource(GetCountUsers, "/admin/dorms/count")
@@ -440,6 +465,7 @@ api.add_resource(Register, "/users")
 api.add_resource(VerifyEmail, "/users")
 api.add_resource(JoinDorm, "/users")
 api.add_resource(Machine, "/machines")
+api.add_resource(LockMachine, "/machines/lock")
 api.add_resource(AddMachineProfile, "/admin/machines")
 api.add_resource(Duck, "/ducks", "/duck", "/test")
 
