@@ -22,6 +22,7 @@ class GetUniverse(Resource):
                 "city": dorm["location"],
                 "devices": len(list(devices))
             }
+
             _check.append(dorm["universe"])
             _temp.append(_obj)
         for _universe in _temp:
