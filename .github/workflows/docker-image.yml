@@ -21,13 +21,16 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Get the date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d')"
 
       - name: Build and push Docker image with commit tag
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: smartdormapp/backend:${{ github.run_id }}
+          tags: smartdormapp/backend:${{ steps.date.outputs.date }}
 
       - name: Build and push Docker image with latest tag
         uses: docker/build-push-action@v2
