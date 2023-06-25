@@ -22,16 +22,12 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Get short SHA
-        id: slug
-        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
-
       - name: Build and push Docker image with commit tag
         uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: smartdormapp/backend:${{ steps.slug.outputs.sha8 }}
+          tags: smartdormapp/backend:${{ github.run_id }}
 
       - name: Build and push Docker image with latest tag
         uses: docker/build-push-action@v2
