@@ -1,0 +1,10 @@
+{
+  "register_verify": {
+    "msg": "<head lang=pl></head><body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'><h2 style='color: black'>Cześć!</h2><p>Dziękujemy za rejestrację w aplikacji SmartDorm Laundry. Aby dokończyć proces rejestracji, prosimy o wpisanie poniższego sześciocyfrowego kodu weryfikacyjnego w odpowiednie pole na ekranie rejestracji:</p><p>Kod weryfikacyjny: <strong style='color: black'>{}</strong></p><p>Prosimy o nie udostępnianie tego kodu nikomu, w celu zabezpieczenia Twojego konta.</p><p>Jeśli nie rejestrowałeś się w aplikacji SmartDorm Laundry, prosimy o zignorowanie tego maila.</p><p>Dziękujemy za korzystanie z naszej aplikacji.</p><p>Pozdrawiamy,<br>Zespół SmartDorm</p></body>",
+    "title": "Potwierdzenie rejestracji w aplikacji SmartDorm Laundry"
+  },
+  "reset_password": {
+    "msg": "<body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'><h2 style='color: black'>Hej, {}</h2><p>Otrzymujesz ten mail, ponieważ poprosiłeś o zresetowanie hasła w aplikacji SmartDorm Laundry. Aby ustawić nowe hasło, prosimy o wpisanie poniższego kodu w aplikacji i postępowanie zgodnie z instrukcjami:</p><p style='color: black'><strong>{}</strong></p><p>Jeśli nie prosiłeś o resetowanie hasła, prosimy o zignorowanie tego maila.</p><p>Pozdrawiamy,<br>Zespół SmartDorm Laundry</p></body>",
+    "title": "Resetowanie Hasła"
+  }
+}

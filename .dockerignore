@@ -1,0 +1,5 @@
+.old
+venv
+.gitignore
+git
+README*.md

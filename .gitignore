@@ -5,6 +5,10 @@
 
 .old/
 
+__pycache__
+
+docker-compose-files
+
 # Node artifact files
 node_modules/
 dist/
@@ -49,3 +53,4 @@ Thumbs.db
 *.mov
 *.wmv
 
+.env

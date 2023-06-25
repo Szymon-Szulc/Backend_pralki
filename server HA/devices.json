@@ -1,0 +1,36 @@
+[
+    {
+        "name": "Smart Plug 2",
+        "id": "bf69c52915f3321445s32i",
+        "key": "GnRsVMeo5#7'}kp9",
+        "mac": "cc:8c:bf:08:1c:f9",
+        "uuid": "bcaeaaa4b625255c",
+        "sn": "220226D30A43D",
+        "category": "cz",
+        "product_name": "Smart Plug",
+        "product_id": "uekfgut3btdby31l",
+        "biz_type": 0,
+        "model": "Aman-2022Q1",
+        "sub": false,
+        "icon": "https://images.tuyaeu.com/smart/icon/ay1541056239985fDGjj/b466252e1a9610f8ccf588d570f9c0b1.png",
+        "ip": "192.168.0.50",
+        "version": "3.3"
+    },
+    {
+        "name": "Smart Plug",
+        "id": "bf842f6b49fba9f5a0xm1f",
+        "key": "+%JYR~~L*([Lxn|W",
+        "mac": "d8:1f:12:e7:14:ac",
+        "uuid": "511133ccdfe0b535",
+        "sn": "220226B3010C4",
+        "category": "cz",
+        "product_name": "Smart Plug",
+        "product_id": "uekfgut3btdby31l",
+        "biz_type": 0,
+        "model": "Aman-2022Q1",
+        "sub": false,
+        "icon": "https://images.tuyaeu.com/smart/icon/ay1541056239985fDGjj/b466252e1a9610f8ccf588d570f9c0b1.png",
+        "ip": "192.168.0.49",
+        "version": "3.3"
+    }
+]

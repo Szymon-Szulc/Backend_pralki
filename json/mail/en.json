@@ -1,0 +1,10 @@
+{
+  "register_verify": {
+    "msg": "<head lang=pl></head><body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'><h2 style='color: black'>Hi!</h2><p>Thank you for registering with the SmartDorm Laundry app. </p><p>Verification Code: <strong style='color: black'>{}</strong></p><p>Please do not share this code with anyone to protect your account.</p><p>If you have not registered with the SmartDorm Laundry app, please ignore this email.</p><p>Thank you for using our app.</p><p>Best regards,<br>The SmartDorm team</p></body>",
+    "title": "Confirmation of registration in the SmartDorm Laundry application"
+  },
+  "reset_password": {
+    "msg": "<body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'><h2 style='color: black'>Hi, {}</h2><p>You are receiving this email because you have requested to reset your password in the SmartDorm Laundry app. To set a new password, please enter the code below in the app and follow the instructions:</p><p style='color: black'><strong>{}</strong></p><p>If you have not requested a password reset, please ignore this email.</p><p>Best regards,<br>The SmartDorm Laundry team</p></body>",
+    "title": "Password Reset"
+  }
+}

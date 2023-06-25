@@ -1,0 +1,55 @@
+{
+    "timestamp": 1685617671.6946948,
+    "devices": [
+        {
+            "id": "bf842f6b49fba9f5a0xm1f",
+            "ip": "192.168.0.49",
+            "active": 2,
+            "encrypt": true,
+            "productKey": "keya4gvchmtapm8n",
+            "name": "Smart Plug",
+            "key": "+%JYR~~L*([Lxn|W",
+            "mac": "d8:1f:12:e7:14:ac",
+            "ability": 0,
+            "token": "",
+            "wf_cfg": "",
+            "dev_type": "default",
+            "err": "",
+            "type": "default",
+            "dps": {
+                "dps": {
+                    "1": false,
+                    "9": 0,
+                    "38": "memory"
+                }
+            },
+            "origin": "broadcast",
+            "ver": "3.3"
+        },
+        {
+            "id": "bf69c52915f3321445s32i",
+            "ip": "192.168.0.50",
+            "active": 2,
+            "encrypt": true,
+            "productKey": "keya4gvchmtapm8n",
+            "name": "Smart Plug 2",
+            "key": "GnRsVMeo5#7'}kp9",
+            "mac": "cc:8c:bf:08:1c:f9",
+            "ability": 0,
+            "token": "",
+            "wf_cfg": "",
+            "dev_type": "default",
+            "err": "",
+            "type": "default",
+            "dps": {
+                "dps": {
+                    "1": false,
+                    "9": 0,
+                    "38": "memory"
+                }
+            },
+            "origin": "broadcast",
+            "ver": "3.3"
+        }
+    ]
+}

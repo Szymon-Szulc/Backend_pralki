@@ -1,0 +1,28 @@
+{
+  "short_wash": {
+    "title": "Time is up!",
+    "message": "Reservation timed out - washing machine No. {} is available again for others"
+  },
+  "short_dry": {
+    "title": "Time is up!",
+    "message": "Reservation timed out - dryer No. {} is available again for others"
+  },
+  "timer_wash": {
+    "title": "Time is up!",
+    "message": "The set time of the washing program has elapsed - collect your laundry"
+  },
+  "timer_dry": {
+    "title": "Time is up!",
+    "message": "The set time of the drying program has elapsed - collect your laundry"
+  },
+  "released_wash": {
+    "title": "Washing machine number {} free!",
+    "message": "Washing machine No. {} is free now, would you like to reserve it?"
+  },
+  "released_dry": {
+    "title": "Dryer number {} free!",
+    "message": "Dryer No. {} is now available, would you like to reserve it?"
+  },
+  "any_card_payment": {"title": "Card Payment Only", "message": "Today, only card payment is available"},
+  "any_cash_payment": {"title": "Cash Payment Only", "message": "Today, only cash payment is available"}
+}

@@ -1,0 +1,10 @@
+{
+  "short_wash": {"title": "Czas dobiegł końca!", "message": "Upłynął czas rezerwacji - pralka nr {} jest ponownie dostępna dla innych"},
+  "short_dry": {"title": "Czas dobiegł końca!", "message": "Upłynął czas rezerwacji - suszarka nr {} jest ponownie dostępna dla innych"},
+  "timer_wash": {"title": "Czas dobiegł końca!", "message": "Upłynął ustawiony czas programu prania - odbierz swoje pranie"},
+  "timer_dry": {"title": "Czas dobiegł końca!", "message": "Upłynął ustawiony czas programu suszenia - odbierz swoje pranie"},
+  "released_wash": {"title": "Pralka numer {} wolna!", "message": "Pralka nr {} jest już wolna, chcesz ją zarezerwować?"},
+  "released_dry": {"title": "Suszarka numer {} wolna!", "message": "Suszarka nr {} jest już wolna, chcesz ją zarezerwować?"},
+  "any_card_payment": {"title": "Płatność tylko kartą", "message": "W dniu dzisiejszym jest dostępna tylko płatność kartą"},
+  "any_cash_payment": {"title": "Płatność tylko gotówką", "message": "W dniu dzisiejszym jest dostępna tylko płatność gotówką"}
+}

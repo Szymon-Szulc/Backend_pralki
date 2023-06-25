@@ -1,0 +1,88 @@
+{
+    "result": [
+        {
+            "active_time": 1685617553,
+            "biz_type": 0,
+            "category": "cz",
+            "create_time": 1673863030,
+            "icon": "smart/icon/ay1541056239985fDGjj/b466252e1a9610f8ccf588d570f9c0b1.png",
+            "id": "bf69c52915f3321445s32i",
+            "ip": "178.235.185.90",
+            "lat": "51.7654",
+            "local_key": "GnRsVMeo5#7'}kp9",
+            "lon": "18.0917",
+            "model": "Aman-2022Q1",
+            "name": "Smart Plug 2",
+            "online": true,
+            "owner_id": "156814012",
+            "product_id": "uekfgut3btdby31l",
+            "product_name": "Smart Plug",
+            "status": [
+                {
+                    "code": "switch_1",
+                    "value": false
+                },
+                {
+                    "code": "countdown_1",
+                    "value": 0
+                },
+                {
+                    "code": "relay_status",
+                    "value": "last"
+                }
+            ],
+            "sub": false,
+            "time_zone": "+02:00",
+            "uid": "eu1684994760141YnEKA",
+            "update_time": 1685617556,
+            "uuid": "bcaeaaa4b625255c"
+        },
+        {
+            "active_time": 1685617460,
+            "biz_type": 0,
+            "category": "cz",
+            "create_time": 1672920081,
+            "icon": "smart/icon/ay1541056239985fDGjj/b466252e1a9610f8ccf588d570f9c0b1.png",
+            "id": "bf842f6b49fba9f5a0xm1f",
+            "ip": "178.235.185.90",
+            "lat": "51.7654",
+            "local_key": "+%JYR~~L*([Lxn|W",
+            "lon": "18.0917",
+            "model": "Aman-2022Q1",
+            "name": "Smart Plug",
+            "online": true,
+            "owner_id": "156814012",
+            "product_id": "uekfgut3btdby31l",
+            "product_name": "Smart Plug",
+            "status": [
+                {
+                    "code": "switch_1",
+                    "value": false
+                },
+                {
+                    "code": "countdown_1",
+                    "value": 0
+                },
+                {
+                    "code": "relay_status",
+                    "value": "last"
+                }
+            ],
+            "sub": false,
+            "time_zone": "+02:00",
+            "uid": "eu1684994760141YnEKA",
+            "update_time": 1685617463,
+            "uuid": "511133ccdfe0b535"
+        }
+    ],
+    "success": true,
+    "t": 1685617620483,
+    "tid": "6e6ed5af006c11eea795ce4cada2c678",
+    "file": {
+        "name": "tuya-raw.json",
+        "description": "Full raw list of Tuya devices.",
+        "account": "tyx5798ty7yr3xrn95nd",
+        "date": "2023-06-01T13:06:49.242280",
+        "tinytuya": "1.12.7"
+    }
+}

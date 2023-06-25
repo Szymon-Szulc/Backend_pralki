@@ -1,0 +1,10 @@
+{
+"register_verify": {
+"msg": "<head lang=uk></head><body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'><h2 style='color: black'>Привіт!</h2><p>Дякуємо за реєстрацію в додатку SmartDorm Laundry. Щоб завершити процес реєстрації, будь ласка, введіть нижченаведений шестизначний код перевірки в відповідне поле на екрані реєстрації:</p><p>Код перевірки: <strong style='color: black'>{}</strong></p><p>Будь ласка, не передавайте цей код нікому для захисту вашого облікового запису.</p><p>Якщо ви не реєструвалися в додатку SmartDorm Laundry, будь ласка, проігноруйте цей лист.</p><p>Дякуємо за використання нашого додатку.</p><p>З повагою,<br>Команда SmartDorm</p></body>",
+"title": "Підтвердження реєстрації в додатку SmartDorm Laundry"
+},
+"reset_password": {
+"msg": "<body style='font-family: Arial, sans-serif; font-size: 14px; color: #555'><h2 style='color: black'>Привіт, {}</h2><p>Ви отримали цей лист, оскільки запросили скидання пароля в додатку SmartDorm Laundry. Щоб встановити новий пароль, будь ласка, введіть нижченаведений код в додатку та дотримуйтеся інструкцій:</p><p style='color: black'><strong>{}</strong></p><p>Якщо ви не запитували скидання пароля, будь ласка, проігноруйте цей лист.</p><p>З повагою,<br>Команда SmartDorm Laundry</p></body>",
+"title": "Скидання Пароля"
+}
+}

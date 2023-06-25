@@ -1,263 +1,133 @@
 # Dokumentacja API
 ***
-# Check — Sprawdzanie maila i hasła
-### URL
-`GET /check?email=:email&password=:password`
-### Parametry
-| Nazwa parametru | Typ    | Opis                                        |
-|-----------------|--------|---------------------------------------------|
-| email           | String | Adres e-mail, którego dostępność sprawdzamy |
-| password        | String | Hasło, które sprawdzamy                     |
-### Odpowiedź
-```JSON
-{
-  "message": {
-    "name": "Nie znaleziono użytkownika"
-  }
-}
-```
-### Kod Odpowiedzi
-| Kod odpowiedzi | Opis                                                       |
-|----------------|------------------------------------------------------------|
-| 404            | Sukces - Adres email jest dostępny i hasło jest prawidłowe |
-| 200            | Błąd - Adres email NIE jest dostępny                       |
-| 400            | Błąd - Adres email NIE jest w prawidłowym formacie         |
-| 422            | Błąd - Hasło jest niepoprawne                              |
-# Users — Rejestracja użytkownika
-### URL
-`POST /users`
-### Parametry
-| Nazwa parametru | Typ    | Opis                     |
-|-----------------|--------|--------------------------|
-| email           | String | Adres e-mail użytkownika |
-| password        | String | Hasło użytkownika        |
-| name            | String | Nazwa użytkownika        |
-### Zapytanie
-```JSON
-{
-  "email": "stefan@gmail.com",
-  "password": "S1lneH4sło!",
-  "name": "stefcio"
-}
-```
-### Odpowiedź
-```JSON
-{
-  "message": {
-    "name": "Użytkownik utworzony!"
-  }
-}
-```
-### Kod Odpowiedzi
-| Kod odpowiedzi | Opis                                            |
-|----------------|-------------------------------------------------|
-| 201            | Sukces - Użytkownik został dodany               |
-| 400            | Błąd - Użytkownik już istnieje                  |
-| 409            | Błąd - Użytkownik nie potwierdził adresu E-mail |
-### Informacje
-Ta funkcja powoduje wysłanie na podany adres E-mail kodu (6 cyfr) weryfikacyjnego
-# Users - Weryfikacja adresu e-mail
-### URL
-`PUT /users`
-### Parametry
-| Nazwa parametru | Typ    | Opis                                           |
-|-----------------|--------|------------------------------------------------|
-| email           | String | Adres E-mail użytkownika                       |
-| code            | String | Kod użytkownika który został wysłany na E-mail |
-### Zapytanie
-```JSON
-{
-  "email": "stefan@gmail.com",
-  "code": "111111"
-}
-```
-### Odpowiedź
-```JSON
-{
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjJ9.z3KDaNlqVgez4hQ64Gyi_tSoV1pzIWtOb09rbGMU9Nk"
-}
-```
-### Kod Odpowiedzi
-| Kod odpowiedzi | Opis                                        |
-|----------------|---------------------------------------------|
-| 200            | Sukces - Użytkownik zweryfikowany           |
-| 404            | Błąd - Użytkownik NIE istnieje              |
-| 400            | Błąd - Podany kod weryfikacyjny jest błędny |
-# Users — Dodawanie użytkownika do akademika
-### URL
-`PATCH /users`
-### Parametry
-| Nazwa parametru | Typ    | Opis                |
-|-----------------|--------|---------------------|
-| token           | String | Token autoryzacyjny |
-| code            | String | Kod akademika       |
-### Zapytanie
-```JSON
-{
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjF9.v1d8M_O74uyT_OJxTnUEbwzSZEVJR_vCMEuLKuiaPeo",
-  "code": "1111111"
-}
-```
-### Odpowiedź
-```JSON
-{
-    "dorm_name": "Akademik 1"
-}
-```
-### Kod Odpowiedzi
-| Kod odpowiedzi | Opis                                                                        |
-|----------------|-----------------------------------------------------------------------------|
-| 200            | Sukces - Kod akademika poprawny, użytkownik dodany do akademika `dorm-name` |
-| 401            | Błąd - Podany token jest nieprawidłowy                                      |
-| 400            | Bład - Podany kod jest nieprawidłowy                                        |
+## USERS
+***
+### Rejestracja
+***
+#### Rejestracja
+Endpoint:
+>POST /api/v1/users/register
 
-### Autoryzacja
-Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z weryfikacji adresu e-mail albo logowania
-# Users — Logowanie
-### URL
-`GET /users?email=:email&password=:password`
-### Parametry
-| Nazwa Parametru | Typ    | Opis                     |
-|-----------------|--------|--------------------------|
-| email           | String | Adres e-mail użytkownika |
-| password        | String | Hasło użytkownika        |
-### Odpowiedź
+Argumenty:
+>email - adres email <br>
+>password - hasło
+
+Kody HTTP:
+> 400 - niepoprawny format email<br>
+> 422 - niepoprawny format hasła<br>
+> 403 - Użytkownik już istnieje<br>
+> 403 - Użytkownik istnieje, ale nie potwierdził emaila<br>
+> 201 - Użytkownik zarejestrowany pomyślnie
+<hr>
+
+#### Potwierdzenie adresu E-mail
+Endpoint:
+>PUT /api/v1/users/register/verify
+
+Argumenty:
+> email - adres email <br>
+> code - kod weryfikacyjny <br>
+> name - nazwa użytkownika
+
+Kody HTTP:
+> 400 - podany kod weryfikacyjny jest błędny<br>
+> 200 - konto zweryfikowane pomyślnie
+
+Pakiet:
+> (200) token - token autoryzacyjny JWT
 ```JSON
 {
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjF9.v1d8M_O74uyT_OJxTnUEbwzSZEVJR_vCMEuLKuiaPeo",
-    "username": "Stefan",
-    "dorm_name": "Akademik 1"
+  "token": "example-token"
 }
 ```
-### Kod odpowiedzi
-| Kod odpowiedzi | Opis                                             |
-|----------------|--------------------------------------------------|
-| 200            | Sukces - Dane autoryzacyjne poprawne             |
-| 400            | Błąd - Adres e-mail albo hasło są NIE prawidłowe |
-# Password-reset — Wysyłanie kodu weryfikacyjnego
-### URL
-`PATCH /password-reset/send-code`
-### Parametry
-| Nazwa parametru | Typ    | Opis                                                 |
-|-----------------|--------|------------------------------------------------------|
-| email           | String | Adres e-mail użytkownika który chce zresetować hasło |
-### Zapytanie
+<hr>
+
+#### Dołączanie użytkownika do akademika
+Endpoint:
+> PATCH /api/v1/users/register/join
+
+Argumenty:
+> token - token autoryzacyjny JWT<br>
+> code - kod akademika
+
+Kody HTTP:
+> 401 - podany kod autoryzacyjny JWT jest błędny<br>
+> 404 - akademik o podanym kodzie nie istnieje<br>
+> 200 - użytkownik został dodany do akademika
+
+Pakiet:
+> (200) dorm_name - nazwa akademika
 ```JSON
 {
-  "email": "stefan@gmail.com"
+  "dorm_name": "Przykładowy Akademik"
 }
 ```
-### Odpowiedź
+***
+### Logowanie
+***
+#### Logowanie
+Endpoint:
+> GET /api/v1/users/login
+
+Argumenty:
+> email - adres email<br>
+> password - hasło
+
+Kody HTTP:
+> 400 - podany kod autoryzacyjny JWT jest błędny<br>
+> 404 - akademik o podanym kodzie nie istnieje<br>
+> 200 - użytkownik został dodany do akademika
+
+Pakiet:
+> (200) dorm_name - nazwa akademika
 ```JSON
 {
-  "message": {
-    "name": "Mail wysłany"
-  }
+  "dorm_name": "Przykładowy Akademik"
 }
-```
-### Kod Odpowiedzi
-| Kod odpowiedzi | Opis                                                   |
-|----------------|--------------------------------------------------------|
-| 200            | Sukces - E-mail z kodem został wysłany                 |
-| 404            | Błąd - Nie znaleziono użytkownika z tym adresem e-mail |
-# Password-reset — Weryfikacja kodu resetu hasła
-### URL
-`GET /password-reset/?email=:email&code=:code`
-### Parametry
-| Nazwa parametru | Typ    | Opis                                     |
-|-----------------|--------|------------------------------------------|
-| code            | String | Kod weryfikacyjny do resetu hasła        |
-| email           | String | Adres e-mail na który został wysłany kod |
-### Odpowiedź
-```JSON
-{
-  "message": {
-    "name": "Kod jest prawidłowy"
-  }
-}
-```
-### Kod Odpowiedzi
-| Kod odpowiedzi | Opis                                       |
-|----------------|--------------------------------------------|
-| 200            | Sukces - Kod prawidłowy                    |
-| 404            | Błąd - Nie znaleziono użytkownika          |
-| 400            | Błąd - Podany kod weryfikacyjny jest błędy |
-# Password-reset — Ustawianie nowego hasła
-### URL
-`PATCH /password-reset`
-### Parametry
-| Nazwa parametru | Typ    | Opis                              |
-|-----------------|--------|-----------------------------------|
-| email           | String | Adres e-mail użytkownika          |
-| new_password    | String | Nowe hasło które ma być ustawione |
-### Zapytanie
-```JSON
-{
-    "email": "stefan@gmail.com",
-    "new_password": "NoweHasło"
-}
-```
-### Odpowiedź
-```JSON
-{
-  "message": {
-    "name": "Hasło zostało zmienione"
-  }
-}
-```
-### Kod Odpowiedzi
-| Kod odpowiedzi | Opis                              |
-|----------------|-----------------------------------|
-| 200            | Sukces - Hasło zostało zmienione  |
-| 404            | Błąd - Nie znaleziono użytkownika |
-# Machines — Listowanie maszyn
-### URL
-`GET /machines?token=:token`
-### Parametry
-| Nazwa parametru | Typ    | Opis                |
-|-----------------|--------|---------------------|
-| token           | String | Token autoryzacyjny |
-### Odpowiedź
-```JSON
-{
-    "machines": [
-        {
-            "turn_on": false,
-            "name": "Pralka 1",
-            "type": "0"
-        },
-        {
-            "turn_on": false,
-            "name": "Suszarka 2",
-            "type": "1"
-        }
-    ]
-}
-```
-| Nazwa odpowiedzi | Opis                                    |
-|------------------|-----------------------------------------|
-| turn_on          | Czy włączone                            |
-| name             | Nazwa urządzenia                        |
-| type             | Typ urządzenia 0 - Pralka, 1 - Suszarka |
-### Kod Odpowiedzi
-| Kod Odpowiedzi | Opis                              |
-|----------------|-----------------------------------|
-| 200            | Sukces - Dane prawidłowe          |
-| 401            | Błąd - Błędny token autoryzacyjny |
-### Autoryzacja
-Aby korzystać z tego endpointu, należy pozyskać `token` można go pozyskać z weryfikacji adresu e-mail albo logowania
-# Raport — Uzyskiwanie listy raport
-### URL
-`GET /raport?token=:token?lang=:lang`
-### Parametry
-| Nazwa parametry | Typ    | Opis                      |
-|-----------------|--------|---------------------------|
-| token           | String | Token autoryzacyjny       |
-| lang            | String | Język użytkownika [pl,en] |
-### Odpowiedź
-`Zawartość jsona z listą problemów dla akademika który jest przypisany do użytkownika`
-### Kod Odpowiedzi:
-| Kod odpowiedzi | Opis                                         |
-|----------------|----------------------------------------------|
-| 200            | Sukces - Przekazano JSON'a z listą problemów |
-| 401            | Błąd - Token autoryzacyjny jest błędy        |
+``` 
+***
+### Reset Hasła
+***
+### Wysyłanie maila
+Endpoint:
+> PATCH /api/v1/users/reset-password/send
+
+Argumenty:
+> email - adres e-mail
+
+Kody HTTP:
+> 400 - niepoprawny adres e-mail<br>
+> 404 - nieznaleziono użytkownika o podanym adresie e-mail<br>
+> 200 - mail został wysłany do użytkownika, użytkownik został oznaczony w bazie danych flagą resetu hasła
+<hr>
+
+### Weryfikacja kodu
+Endpoint:
+> GET - /api/v1/users/reset-password/verify
+
+Argumenty:
+> email - adres e-mail
+> code - kod weryfikacyjny
+
+Kody HTTP:
+> 400 - niepoprawny e-mail<br>
+> 401 - podany kod jest błędny<br>
+> 404 - nieznaleziono użytkownika o podanym adresie e-mail z flagą resetu hasła<br>
+> 200 - podany kod jest prawidłowy
+<hr>
+
+### Ustawienie nowego hasła
+Endpoint:
+> PATCH /api/v1/users/reset-password
+
+Argumenty:
+> email - adres e-mail
+> code - kod weryfikacyjny
+> password - hasło które ma być ustawione
+
+Kody HTTP:
+> 400 - niepoprawny e-mail<br>
+> 401 - podany kod jest błędny<br>
+> 404 - nieznaleziono użytkownika o podanym adresie e-mail z flagą resetu hasła<br>
+> 422 - niepoprawne hasła<br>
+> 201 - hasło zostało zmienione
