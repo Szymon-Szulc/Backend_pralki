@@ -18,57 +18,60 @@ class Google(Resource):
 
         user = Mongo.get("users", {"PersonalData.email": data["email"]})
 
-        if user is None:
-            try:
-                user_id = Mongo.get("users", {}, list({"uid": -1}.items()))["uid"] + 1
-            except TypeError:
-                user_id = 1
 
-            token = Auth.code_jwt(user_id)
 
-            user_object = {
-                "uid": user_id,
-                "PersonalData": {
-                    "name": data["given_name"].title(),
-                    "surname": data["family_name"].title(),
-                    "email": data["email"],
-                    "lang": args["lang"],
-                },
-                "Data": {
-                    "password": None,
-                    "device_token": args["device_token"],
-                    "social_connect": ["google"],
-                    "did": 0,
-                },
-                "Flags": {
-                    "unread_notify": False
-                },
-                "Stats": {
+        # if user is None:
 
-                }
-            }
-            Mongo.save_obj("users", user_object)
-            return {
-                "token": token,
-                "username": user_object["PersonalData"]["name"] + " " + user_object["PersonalData"]["surname"],
-                "name": user_object["PersonalData"]["name"],
-                "surname": user_object["PersonalData"]["surname"],
-            }, 422
-
-        token = Auth.code_jwt(user["uid"])
-
-        if user["Data"]["did"] == 0:
-            return {
-                "token": token,
-                "username": user["PersonalData"]["name"] + " " + user["PersonalData"]["surname"],
-                "name": user["PersonalData"]["name"],
-                "surname": user["PersonalData"]["surname"],
-            }, 422
-
-        return {
-            "token": token,
-            "username": user["PersonalData"]["name"] + " " + user["PersonalData"]["surname"],
-            "name": user["PersonalData"]["name"],
-            "surname": user["PersonalData"]["surname"],
-            "dorm_name": Mongo.get("dorms", {"did": user["Data"]["did"]})["name"]
-        }, 200
+        #     try:
+        #         user_id = Mongo.get("users", {}, list({"uid": -1}.items()))["uid"] + 1
+        #     except TypeError:
+        #         user_id = 1
+        #
+        #     token = Auth.code_jwt(user_id)
+        #
+        #     user_object = {
+        #         "uid": user_id,
+        #         "PersonalData": {
+        #             "name": data["given_name"].title(),
+        #             "surname": data["family_name"].title(),
+        #             "email": data["email"],
+        #             "lang": args["lang"],
+        #         },
+        #         "Data": {
+        #             "password": None,
+        #             "device_token": args["device_token"],
+        #             "social_connect": ["google"],
+        #             "did": 0,
+        #         },
+        #         "Flags": {
+        #             "unread_notify": False
+        #         },
+        #         "Stats": {
+        #
+        #         }
+        #     }
+        #     Mongo.save_obj("users", user_object)
+        #     return {
+        #         "token": token,
+        #         "username": user_object["PersonalData"]["name"] + " " + user_object["PersonalData"]["surname"],
+        #         "name": user_object["PersonalData"]["name"],
+        #         "surname": user_object["PersonalData"]["surname"],
+        #     }, 422
+        #
+        # token = Auth.code_jwt(user["uid"])
+        #
+        # if user["Data"]["did"] == 0:
+        #     return {
+        #         "token": token,
+        #         "username": user["PersonalData"]["name"] + " " + user["PersonalData"]["surname"],
+        #         "name": user["PersonalData"]["name"],
+        #         "surname": user["PersonalData"]["surname"],
+        #     }, 422
+        #
+        # return {
+        #     "token": token,
+        #     "username": user["PersonalData"]["name"] + " " + user["PersonalData"]["surname"],
+        #     "name": user["PersonalData"]["name"],
+        #     "surname": user["PersonalData"]["surname"],
+        #     "dorm_name": Mongo.get("dorms", {"did": user["Data"]["did"]})["name"]
+        # }, 200
