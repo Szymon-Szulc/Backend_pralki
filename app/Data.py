@@ -26,7 +26,8 @@ class Mongo:
 
     @staticmethod
     def save_obj(collection: str, obj: object):
-        db[collection].insert_one(obj)
+        result = db[collection].insert_one(obj)
+        return result.inserted_id
 
     @staticmethod
     def delete(collection: str, conditions: object):
