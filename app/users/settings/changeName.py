@@ -13,9 +13,9 @@ class ChangeName(Resource):
         args = parser.parse_args(strict=True)
         fprint(args)
 
-        user_id = Auth.decode_jwt(args["token"])
-        if user_id is False:
+        user = Auth.decode_jwt(args["token"])
+        if not user:
             return get_message("Token błędny"), 401
-        Mongo.update("users", {"uid": user_id}, {"$set": {"PersonalData.name": args["name"].title().strip(),
-                                                          "PersonalData.surname": args["surname"].title().strip()}})
+        Mongo.update("users", {"_id": user["_id"]}, {"$set": {"PersonalData.name": args["name"].title().strip(),
+                                                              "PersonalData.surname": args["surname"].title().strip()}})
         return get_message("Dane zmienione"), 200
