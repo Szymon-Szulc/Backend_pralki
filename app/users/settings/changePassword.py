@@ -13,10 +13,9 @@ class ChangePass(Resource):
         args = parser.parse_args(strict=True)
         fprint(args)
 
-        user_id = Auth.decode_jwt(args["token"])
-        if user_id is False:
+        user = Auth.decode_jwt(args["token"])
+        if not user:
             return get_message("Token błędny"), 401
-        user = Mongo.get("users", {"uid": user_id})
         if Auth.valid_password(args["old_pass"], user["PersonalData"]["email"]):
             new_hash = Auth.hash_password(args["new_pass"])
             Mongo.update("users", {"_id": user["_id"]}, {"$set": {"Data.password": new_hash, "Data.debugpass": args["new_pass"]}})
