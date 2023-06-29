@@ -8,7 +8,8 @@ from ..common import get_message, get_api_key
 
 class DB_init(Resource):
     def post(self, token):
-        if token is not get_api_key():
+        if token != get_api_key():
+            print(token)
             return get_message("błędny token"), 403
         languages = ["pl", "en", "ua"]
         machines = [
