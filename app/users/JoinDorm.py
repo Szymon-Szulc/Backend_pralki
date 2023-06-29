@@ -13,12 +13,12 @@ class JoinDorm(Resource):
         fprint(args)
 
         dorm = Mongo.get("dorms", {"code": args["code"]})
-        user_id = Auth.decode_jwt(args["token"])
+        user = Auth.decode_jwt(args["token"])
         # user_id = decode_user_jwt(args["token"])
-        if user_id is False:
+        if user is False:
             return get_message("Token błędny"), 401
         if not dorm:
             return get_message("Akademik o podanym kodzie nie istnieje"), 404
-        Mongo.update("users", {"uid": user_id}, {"$set": {"Data.did": dorm["did"]}})
-        Mongo.update("users", {"uid": user_id}, {"$inc": {"Stats.dorm-change-count": 1}})
+        Mongo.update("users", {"_id": user["_id"]}, {"$set": {"Data.did": dorm["_id"]}})
+        Mongo.update("users", {"_id": user["_id"]}, {"$inc": {"Stats.dorm-change-count": 1}})
         return {"dorm_name": dorm["name"]}, 200
