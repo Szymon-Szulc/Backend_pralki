@@ -62,7 +62,7 @@ class Google(Resource):
         else:
             code, name = self.check_dorm(user)
             token = Auth.code_jwt(user["_id"])
-
+            Mongo.update("users", {"_id": user["_id"]}, {"$set": {"PersonalData.lang": args["lang"]}})
             return {
                 "token": token,
                 "username": user["PersonalData"]["name"] + " " + user["PersonalData"]["surname"],
