@@ -14,16 +14,16 @@ class AnyFree(Resource):
         parser.add_argument("token")
         args = parser.parse_args()
         fprint(args)
-        user_id = Auth.decode_jwt(args["token"])
-        if user_id is False:
+        user = Auth.decode_jwt(args["token"])
+        if user is False:
             return get_message("podany token jest błędny"), 400
-        dorm_id = Mongo.get("users", {"uid": user_id})["Data"]["did"]
+        dorm_id = user["Data"]["did"]
         type_device = "wash"
         if int(args["type"]) == 1:
             type_device = "dry"
         notify_obj = {
             "notify-time": datetime(2001, 9, 11),
-            "uid": user_id,
+            "uid": user["_id"],
             "did": dorm_id,
             "machine-type": int(args['type']),
             "type": "released_{}".format(type_device),
