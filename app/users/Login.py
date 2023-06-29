@@ -7,6 +7,15 @@ from ..common import get_message, fprint
 
 
 class Login(Resource):
+    def check_dorm(self, user):
+        code = 422
+        name = "empty"
+        if user["Data"]["did"]:
+            code = 200
+            name = Mongo.get("dorms", {"_id": user["Data"]["did"]})["name"]
+        return code, name
+
+
     def get(self):
         args = request.args
         fprint(args)
@@ -18,20 +27,14 @@ class Login(Resource):
             Mongo.update("users", {"_id": user["_id"]},
                          {"$set": {"Data.device_token": args["device_token"], "PersonalData.lang": args["lang"]}})
             Mongo.update("users", {"_id": user["_id"]}, {"$inc": {"Stats.login-count": 1}})
-            if user["Data"]["did"] == 0:
-                return {
-                    "token": token,
-                    "username": user["PersonalData"]["name"] + " " + user["PersonalData"]["surname"],
-                    "name": user["PersonalData"]["name"],
-                    "surname": user["PersonalData"]["surname"],
-                }, 422
+            code, name = self.check_dorm(user)
             return {
                 "token": token,
                 "username": user["PersonalData"]["name"] + " " + user["PersonalData"]["surname"],
                 "name": user["PersonalData"]["name"],
                 "surname": user["PersonalData"]["surname"],
-                "dorm_name": Mongo.get("dorms", {"did": user["Data"]["did"]})["name"]
-            }, 200
+                "dorm_name": name
+            }, code
         elif Auth.valid_password_cache(args["password"], email):
             return get_message("Użytkownik nie potwierdził e-maila"), 403
         else:
