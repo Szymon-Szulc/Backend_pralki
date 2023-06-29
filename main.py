@@ -81,8 +81,8 @@ def start_notify():
 
 if __name__ == '__main__': 
     api = threading.Thread(target=start_api)
-    api.daemon = True
+    api.daemon = False
     api.start()
 notify = threading.Thread(target=start_notify)
-notify.daemon = False
-notify.start()
+notify.daemon = True
+# notify.start()
