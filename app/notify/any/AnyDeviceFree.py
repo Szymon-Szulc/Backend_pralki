@@ -15,7 +15,7 @@ class AnyFree(Resource):
         args = parser.parse_args()
         fprint(args)
         user = Auth.decode_jwt(args["token"])
-        if user is False:
+        if not user:
             return get_message("podany token jest błędny"), 400
         dorm_id = user["Data"]["did"]
         type_device = "wash"
