@@ -1,5 +1,5 @@
 import os
-
+from bson import ObjectId
 import argon2
 import jwt
 from dotenv import load_dotenv
@@ -19,13 +19,18 @@ class Auth:
     def decode_jwt(token):
         headers = jwt.get_unverified_header(token)
         try:
-            return jwt.decode(token, key, headers['alg'])["uid"]
-        except jwt.InvalidSignatureError:
+            decode = jwt.decode(token, key, headers['alg'])["uid"]
+            print(decode)
+            _id = ObjectId(decode)
+            user = db.users.find_one({"_id": _id})
+            return user
+        except (jwt.InvalidSignatureError, jwt.exceptions.DecodeError) as e:
+            print("error jwt: ", e)
             return False
 
     @staticmethod
     def code_jwt(user_id):
-        payload = {'uid': user_id}
+        payload = {'uid': str(user_id)}
         return jwt.encode(payload, key)
 
     @staticmethod
