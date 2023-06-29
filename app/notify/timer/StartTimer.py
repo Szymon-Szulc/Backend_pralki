@@ -14,10 +14,10 @@ class StartTimer(Resource):
         parser.add_argument("id")
         args = parser.parse_args()
         fprint(args)
-        user_id = Auth.decode_jwt(args["token"])
-        if user_id is False:
+        user = Auth.decode_jwt(args["token"])
+        if not user:
             return get_message("podany token jest błędny"), 400
-        dorm_id = Mongo.get("users", {"uid": user_id})["Data"]["did"]
+        dorm_id = user["Data"]["did"]
         datetime_obj = datetime.strptime(args["end_time"], '%Y-%m-%dT%H:%M:%S.%fZ')
         machine = Mongo.get("machines", {"Data.did": dorm_id, "Data.id": int(args["id"])})
         last_washing_machine = Mongo.get("machines", {'Data.did': dorm_id, "Flags.type": 0},
@@ -27,13 +27,13 @@ class StartTimer(Resource):
         if machine["Flags"]["type"] == 1:
             _type = "dry"
 
-        notify = Mongo.get("notify", {"uid": user_id, "did": dorm_id, "machine-id": int(args["id"])})
+        notify = Mongo.get("notify", {"uid": user["_id"], "did": dorm_id, "machine-id": int(args["id"])})
         if notify is not None:
             return get_message("Timer już istnieje"), 409
 
         notify_obj = {
             "notify-time": datetime_obj.replace(second=0, microsecond=0),
-            "uid": user_id,
+            "uid": user["_id"],
             "did": dorm_id,
             "machine-id": int(args["id"]),
             "machine-type": int(machine["Flags"]["type"]),
