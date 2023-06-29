@@ -9,8 +9,8 @@ from .getCategories import GetCategories
 from .getQuestions import GetQuestions
 from .getScreen import GetScreen
 
-api.add_resource(GetCategories, "/<string:lang>")
-api.add_resource(GetQuestions, "/<string:lang>/<string:category>")
-api.add_resource(GetScreen, "/<string:lang>/<string:category>/<string:_id>", "/<string:lang>/<string:category>/<string:_id>/<string:screen>")
+api.add_resource(GetCategories, "")
+api.add_resource(GetQuestions, "/<string:category>")
+api.add_resource(GetScreen, "/<string:category>/<string:_id>", "/<string:lang>/<string:category>/<string:_id>/<string:screen>")
 
 # api.add_resource(Test, "/<string:lang>/<string:did>/<string:category>/<string:_id>/<string:question>", "/<string:lang>/<string:did>/<string:category>/<string:_id>")

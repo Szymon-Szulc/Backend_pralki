@@ -85,4 +85,4 @@ if __name__ == '__main__':
     api.start()
 notify = threading.Thread(target=start_notify)
 notify.daemon = True
-# notify.start()
+notify.start()

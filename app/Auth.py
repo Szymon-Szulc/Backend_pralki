@@ -12,7 +12,6 @@ client = MongoClient(os.environ.get('DATABASE_LINK'))
 db = client.laundry
 ph = argon2.PasswordHasher()
 
-
 class Auth:
 
     @staticmethod
@@ -68,3 +67,23 @@ class Auth:
     @staticmethod
     def hash_password(password):
         return ph.hash(password)
+
+
+class Auth_tablet:
+    @staticmethod
+    def decode_jwt(token):
+        headers = jwt.get_unverified_header(token)
+        try:
+            decode = jwt.decode(token, key, headers['alg'])["did"]
+            print(decode)
+            _id = ObjectId(decode)
+            dorm = db.dorms.find_one({"_id": _id})
+            return dorm
+        except (jwt.InvalidSignatureError, jwt.exceptions.DecodeError) as e:
+            print("error jwt: ", e)
+            return False
+
+    @staticmethod
+    def code_jwt(dorm_id):
+        payload = {'did': str(dorm_id)}
+        return jwt.encode(payload, key)

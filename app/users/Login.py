@@ -10,9 +10,11 @@ class Login(Resource):
     def check_dorm(self, user):
         code = 422
         name = "empty"
-        if user["Data"]["did"]:
+        try:
             code = 200
             name = Mongo.get("dorms", {"_id": user["Data"]["did"]})["name"]
+        except KeyError:
+            pass
         return code, name
 
 
@@ -23,7 +25,7 @@ class Login(Resource):
         email = args["email"].lower().strip()
         if Auth.valid_password(args["password"], email):
             user = Mongo.get("users", {"PersonalData.email": email})
-            token = Auth.code_jwt(user["uid"])
+            token = Auth.code_jwt(user["_id"])
             Mongo.update("users", {"_id": user["_id"]},
                          {"$set": {"Data.device_token": args["device_token"], "PersonalData.lang": args["lang"]}})
             Mongo.update("users", {"_id": user["_id"]}, {"$inc": {"Stats.login-count": 1}})

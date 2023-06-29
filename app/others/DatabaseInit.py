@@ -16,7 +16,6 @@ class DB_init(Resource):
             {
                 "DevName": "Pralka 1, Virtual Akademik Kalisz",
                 "Data": {
-                    "did": 1,
                     "id": 0,
                     "model": "xiaomi"
                 },
@@ -35,7 +34,6 @@ class DB_init(Resource):
             {
                 "DevName": "Pralka 2, Virtual Akademik Kalisz",
                 "Data": {
-                    "did": 1,
                     "id": 1,
                     "model": "samsung"
                 },
@@ -54,7 +52,6 @@ class DB_init(Resource):
             {
                 "DevName": "Suszarka 1, Virtual Akademik Kalisz",
                 "Data": {
-                    "did": 1,
                     "id": 2,
                     "model": "xiaomi"
                 },
@@ -73,7 +70,6 @@ class DB_init(Resource):
             {
                 "DevName": "Suszarka 2, Virtual Akademik Kalisz",
                 "Data": {
-                    "did": 1,
                     "id": 3,
                     "model": "samsung"
                 },
@@ -1356,10 +1352,15 @@ class DB_init(Resource):
             for q in other_questions[lang]:
                 Problems.save_obj("other_{}".format(lang), q)
 
-        for machine in machines:
-            Mongo.save_obj("machines", machine)
+        dorm_id = ""
+
         for dorm in dorms:
-            Mongo.save_obj("dorms", dorm)
+            dorm_id = Mongo.save_obj("dorms", dorm)
+
+        for machine in machines:
+            machine["Data"]["did"] = dorm_id
+            Mongo.save_obj("machines", machine)
+
         for notify in notify_table:
             Mongo.save_obj("notify_table", notify)
 

@@ -13,6 +13,7 @@ from .users import my_blueprint as users_bp
 from .dorms import my_blueprint as dorms_bp
 from .raport_problem import my_blueprint as raport_bp
 from .admin_panel import my_blueprint as admin_bp
+from .tablet import my_blueprint as tablet_bp
 
 # Load .env
 if os.getenv("env_file_laundry") == "1":
@@ -37,4 +38,5 @@ app.register_blueprint(dorms_bp, url_prefix=get_prefix("dorms"))
 app.register_blueprint(notify_bp, url_prefix=get_prefix("notify"))
 app.register_blueprint(raport_bp, url_prefix=get_prefix("reports"))
 app.register_blueprint(admin_bp, url_prefix=get_prefix("admin"))
+app.register_blueprint(tablet_bp, url_prefix=get_prefix("tablet"))
 app.register_blueprint(others_bp, url_prefix="")

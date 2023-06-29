@@ -15,7 +15,7 @@ class DeviceFree(Resource):
         args = parser.parse_args()
         fprint(args)
         user = Auth.decode_jwt(args["token"])
-        if user is False:
+        if not user:
             return get_message("podany token jest błędny"), 400
         dorm_id = user["Data"]["did"]
         machine = Mongo.get("machines", {"Data.id": int(args["id"]), "Data.did": dorm_id})
