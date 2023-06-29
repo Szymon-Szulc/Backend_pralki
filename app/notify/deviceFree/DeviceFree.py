@@ -14,10 +14,10 @@ class DeviceFree(Resource):
         parser.add_argument("token")
         args = parser.parse_args()
         fprint(args)
-        user_id = Auth.decode_jwt(args["token"])
-        if user_id is False:
+        user = Auth.decode_jwt(args["token"])
+        if user is False:
             return get_message("podany token jest błędny"), 400
-        dorm_id = Mongo.get("users", {"uid": user_id})["Data"]["did"]
+        dorm_id = user["Data"]["did"]
         machine = Mongo.get("machines", {"Data.id": int(args["id"]), "Data.did": dorm_id})
         print(machine)
         type_device = "wash"
@@ -28,7 +28,7 @@ class DeviceFree(Resource):
             type_device = "dry"
         notify_obj = {
             "notify-time": datetime(2005, 4, 2),
-            "uid": user_id,
+            "uid": user["_id"],
             "did": dorm_id,
             "machine-id": machine["Data"]["id"],
             "machine-type": machine["Flags"]['type'],
