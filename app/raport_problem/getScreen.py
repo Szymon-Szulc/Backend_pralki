@@ -7,12 +7,13 @@ from ..Data import Problems as Mongo
 
 
 class GetScreen(Resource):
-    def get(self, lang, category, _id, screen="q1"):
+    def get(self, category, _id, screen="q1"):
         args = request.args
         token = args["token"]
-        user_id = Auth.decode_jwt(token)
-        if not user_id:
+        user = Auth.decode_jwt(token)
+        if not user:
             return get_message("Błędny token"), 401
+        lang = user["PersonalData"]["lang"]
         question = Mongo.get("{0}_{1}".format(category, lang), {"_id": ObjectId(_id)})
         try:
             _temp = question["screens"][screen]

@@ -12,8 +12,8 @@ class ChangeLanguage(Resource):
         args = parser.parse_args(strict=True)
         fprint(args)
 
-        user_id = Auth.decode_jwt(args["token"])
-        if user_id is False:
+        user = Auth.decode_jwt(args["token"])
+        if user is False:
             return get_message("Token błędny"), 401
-        Mongo.update("users", {"uid": user_id}, {"$set": {"PersonalData.lang": args["lang"]}})
+        Mongo.update("users", {"_id": user["_id"]}, {"$set": {"PersonalData.lang": args["lang"]}})
         return get_message("Język zmieniony"), 200

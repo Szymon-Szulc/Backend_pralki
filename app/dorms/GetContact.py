@@ -12,11 +12,11 @@ class GetContact(Resource):
         status = []
 
         token = args["token"]
-        user_id = Auth.decode_jwt(token)
-        if not user_id:
+        user = Auth.decode_jwt(token)
+        if not user:
             return get_message("Błędny token"), 401
 
-        dorm_id = Mongo.get("users", {"uid": user_id})["Data"]["did"]
+        dorm_id = user["Data"]["did"]
         dorm = Mongo.get("dorms", {"did": dorm_id})
         return {
             "phone-number": dorm["Contact"]["number"],

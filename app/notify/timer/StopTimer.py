@@ -13,10 +13,10 @@ class StopTimer(Resource):
         parser.add_argument("id")
         args = parser.parse_args()
         fprint(args)
-        user_id = Auth.decode_jwt(args["token"])
-        if user_id is False:
+        user = Auth.decode_jwt(args["token"])
+        if user is False:
             return get_message("podany token jest błędny"), 400
-        dorm_id = Mongo.get("users", {"uid": user_id})["Data"]["did"]
-        Mongo.delete("notify", {"uid": user_id, "did": dorm_id, "machine-id": int(args["id"])})
+        dorm_id = user["Data"]["did"]
+        Mongo.delete("notify", {"uid": str(user["_id"]), "did": dorm_id, "machine-id": int(args["id"])})
         return get_message("Timer usunięto"), 200
 

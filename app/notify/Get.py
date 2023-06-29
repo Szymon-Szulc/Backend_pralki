@@ -14,12 +14,11 @@ class GetNotify(Resource):
         status = []
 
         token = args["token"]
-        user_id = Auth.decode_jwt(token)
-        if not user_id:
+        user = Auth.decode_jwt(token)
+        if not user:
             return get_message("Błędny token"), 401
         path = os.path.join(os.getcwd(), "json/notify/")
-        notifis = Mongo.get_many("notify_table", {'uid': user_id})
-        user = Mongo.get("users", {"uid": user_id})
+        notifis = Mongo.get_many("notify_table", {'uid': user["_id"]})
         user_lang = user["PersonalData"]["lang"]
         with open("{0}{1}.json".format(path, user_lang), encoding="UTF-8") as f:
             data = json.load(f)

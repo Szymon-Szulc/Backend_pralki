@@ -7,13 +7,14 @@ from ..common import get_message, fprint
 
 
 class GetCategories(Resource):
-    def get(self, lang):
+    def get(self):
         args = request.args
         token = args["token"]
-        user_id = Auth.decode_jwt(token)
-        if not user_id:
+        user = Auth.decode_jwt(token)
+        if not user:
             return get_message("Błędny token"), 401
         json_path = "json/categories/"
+        lang = user["PersonalData"]["lang"]
         path = os.path.join(os.getcwd(), json_path, "{}.json".format(lang))
         with open(path, encoding="UTF-8") as f:
             data = json.load(f)

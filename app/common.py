@@ -14,6 +14,7 @@ def get_dev():
     return dev
 
 def get_api_key():
+    print(api_key)
     return api_key
 
 def get_message(value):

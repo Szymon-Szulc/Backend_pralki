@@ -15,10 +15,10 @@ class Short(Resource):
         parser.add_argument("token")
         args = parser.parse_args()
         fprint(args)
-        user_id = Auth.decode_jwt(args["token"])
-        if user_id is False:
+        user = Auth.decode_jwt(args["token"])
+        if user is False:
             return get_message("podany token jest błędny"), 400
-        dorm_id = Mongo.get("users", {"uid": user_id})["Data"]["did"]
+        dorm_id = user["Data"]["did"]
         machine = Mongo.get("machines", {"Data.id": int(args['id']), "Data.did": dorm_id})
         if machine["Flags"]['lock']:
             return get_message("Urządzenie jest już zarezerwowane"), 409
@@ -35,7 +35,7 @@ class Short(Resource):
             type_device = "dry"
         notify_obj = {
             "notify-time": rounded_time,
-            "uid": user_id,
+            "uid": user["_id"],
             "machine-id": int(args['id']),
             "number": number_device,
             "type": "short_{}".format(type_device)

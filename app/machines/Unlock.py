@@ -14,9 +14,9 @@ class UnLockMachine(Resource):
         fprint(args)
 
         token = args["token"]
-        user_id = Auth.decode_jwt(token)
-        if not user_id:
+        user = Auth.decode_jwt(token)
+        if not user:
             return get_message("Błędny token"), 401
-        dorm_id = Mongo.get("users", {'uid': user_id})["Data"]['did']
+        dorm_id = user["Data"]['did']
         Mongo.update("machines", {'Data.did': dorm_id, "Data.id": int(args["id"])}, {"$set": {"Flags.lock": False}})
         return get_message("Odblokowano urządzenie"), 200

@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-
 from flask import request
 from flask_restful import Resource
 
@@ -16,11 +15,10 @@ class Machines(Resource):
         json_path = "json/devices/"
         status = []
         token = args["token"]
-        user_id = Auth.decode_jwt(token)
-        if not user_id:
+        user = Auth.decode_jwt(token)
+        if not user:
             return get_message("Błędny token"), 401
-        Mongo.update("users", {"uid": user_id}, {"$set": {"Stats.last-login-time": datetime.today()}})
-        user = Mongo.get("users", {'uid': user_id})
+        Mongo.update("users", {"_id": user["_id"]}, {"$set": {"Stats.last-login-time": datetime.today()}})
         dorm_id = user["Data"]['did']
         lang = user["PersonalData"]["lang"]
         machines = Mongo.get_many("machines", {'Data.did': dorm_id})
@@ -36,15 +34,15 @@ class Machines(Resource):
             name = data[str(machine["Flags"]["type"])] + " " + str(number_device)
             _id = machine["Data"]["id"]
             _did = machine["Data"]["did"]
-            _waiting = Mongo.get("notify", {"uid": user_id, "did": _did, "machine-id": _id, "$or": [{"type": "released_wash"}, {"type": "released_dry"}]})
+            _waiting = Mongo.get("notify", {"uid": user["_id"], "did": _did, "machine-id": _id, "$or": [{"type": "released_wash"}, {"type": "released_dry"}]})
             waiting_for_machine = False
             if _waiting:
                 waiting_for_machine = True
             status.append({"_id": machine["Data"]['id'], "turn_on": machine["Flags"]["turn_on"], "name": name,
                            "type": machine["Flags"]["type"], "lock": machine["Flags"]['lock'],
                            "notify": waiting_for_machine, "broken": machine["Flags"]["broken"]})
-        user_wait_dry = Mongo.get("notify", {"uid": user_id, "type": "released_dry", "any-notify": True})
-        user_wait_wash = Mongo.get("notify", {"uid": user_id, "type": "released_wash", "any-notify": True})
+        user_wait_dry = Mongo.get("notify", {"uid": user["_id"], "type": "released_dry", "any-notify": True})
+        user_wait_wash = Mongo.get("notify", {"uid": user["_id"], "type": "released_wash", "any-notify": True})
         waiting_dry = False
         waiting_wash = False
         if user_wait_dry is not None:
