@@ -7,15 +7,16 @@ from ..Data import Mongo
 
 
 class GetQuestions(Resource):
-    def get(self, lang, category):
+    def get(self, category):
         args = request.args
         token = args["token"]
-        user_id = Auth.decode_jwt(token)
+        user = Auth.decode_jwt(token)
 
-        if not user_id:
+        if not user:
             return get_message("Błędny token"), 401
+        lang = user["PersonalData"]["lang"]
         if category == "washing":
-            dorm_id = Mongo.get("users", {"uid": user_id})["Data"]["did"]
+            dorm_id = user["Data"]["did"]
             try:
                 model = Mongo.get("machines", {"Data.did": dorm_id, "Data.id": int(args["id"]), "Flags.type": 0})["Data"]["model"]
             except TypeError:
