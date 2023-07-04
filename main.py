@@ -58,13 +58,7 @@ def check_db():
         }
         Mongo.delete("notify", {"_id": notif["_id"]})
         Mongo.save_obj("notify_table", notif_table)
-        Mongo.update("users", {"_id": user["_id"]}, {"$set": {"Flags.unread_notify": True}})\
-
-
-
-def start_api():
-    app.run(host="0.0.0.0", port=3002)
-
+        Mongo.update("users", {"_id": user["_id"]}, {"$set": {"Flags.unread_notify": True}})
 def start_notify():
     print("Start notify server...", file=sys.stderr, flush=True)
     now = datetime.now()
@@ -77,6 +71,12 @@ def start_notify():
         check_db()
         # print("test")
         time.sleep(10)
+
+
+def start_api():
+    app.run(host="0.0.0.0", port=3002)
+
+
 
 
 if __name__ == '__main__': 
