@@ -32,7 +32,7 @@ class Auth:
     @staticmethod
     def code_jwt(user_id):
         payload = {'uid': str(user_id)}
-        fprint("payload: ", payload)
+        # fprint("payload: ", payload)
         return jwt.encode(payload, key)
 
     @staticmethod
