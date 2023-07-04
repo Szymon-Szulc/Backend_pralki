@@ -1,15 +1,20 @@
+import base64
 import os
+import zlib
+
 from bson import ObjectId
 import argon2
 import jwt
 from dotenv import load_dotenv
 from pymongo import MongoClient
-
+from cryptography.fernet import Fernet
+import gzip
 from app.common import fprint
 
 if os.environ.get("env_file_laundry") == "1":
     load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 key = os.environ.get('JWT_TOKEN')
+hash_key = os.environ.get('HASH_KEY')
 client = MongoClient(os.environ.get('DATABASE_LINK'))
 db = client.laundry
 ph = argon2.PasswordHasher()
@@ -17,7 +22,9 @@ ph = argon2.PasswordHasher()
 class Auth:
 
     @staticmethod
-    def decode_jwt(token):
+    def decode_jwt(hashed):
+        f = Fernet(hash_key)
+        token = f.decrypt(hashed)
         headers = jwt.get_unverified_header(token)
         try:
             decode = jwt.decode(token, key, headers['alg'])["uid"]
@@ -32,8 +39,10 @@ class Auth:
     @staticmethod
     def code_jwt(user_id):
         payload = {'uid': str(user_id)}
-        # fprint("payload: ", payload)
-        return jwt.encode(payload, key)
+        token_jwt = jwt.encode(payload, key)
+        f = Fernet(hash_key)
+        new_hash = f.encrypt(token_jwt.encode())
+        return new_hash.decode()
 
     @staticmethod
     def valid_password(password, email):
