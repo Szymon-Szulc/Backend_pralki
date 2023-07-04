@@ -8,6 +8,7 @@ import sys
 
 json_path = "json/notify/"
 
+
 def send_push_notification(to, title, body):
     url = "https://exp.host/--/api/v2/push/send"
     headers = {
