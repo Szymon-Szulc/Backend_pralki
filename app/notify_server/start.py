@@ -36,7 +36,7 @@ def check_db():
     # print("test...", file=sys.stderr, flush=True)
     timezone = pytz.timezone('UTC')
     parsed_time = datetime.now(timezone)
-    rounded_time = parsed_time.replace(second=0, microsecond=0)
+    rounded_time = parsed_time.replace(microsecond=0)
     # search_time = rounded_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     notify = Mongo.get_many("notify", {"$or": [{"notify-time": {"$lte": rounded_time}}, {"send": True}]})
     for notif in notify:
