@@ -5,7 +5,7 @@ from flask_restful import Resource, reqparse
 from ..Data import Mongo
 
 
-class Post_Devices(Resource):
+class PostDevices(Resource):
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument("token", required=True, help="Token cannot be blank!")

@@ -5,7 +5,7 @@ from ..Data import Mongo
 from ..common import fprint
 
 
-class Get_Devices(Resource):
+class GetDevices(Resource):
     def get(self):
         # parser = reqparse.RequestParser()
         # parser.add_argument("token", required=True, help="Token cannot be blank!")
