@@ -1,9 +1,11 @@
 import os
+import threading
 
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
+from NotifyServer import start_notify
 
 from .dorm_server import my_blueprint as dorms_s_bp
 from .machines import my_blueprint as machines_bp
@@ -40,3 +42,8 @@ app.register_blueprint(raport_bp, url_prefix=get_prefix("reports"))
 app.register_blueprint(admin_bp, url_prefix=get_prefix("admin"))
 app.register_blueprint(tablet_bp, url_prefix=get_prefix("tablet"))
 app.register_blueprint(others_bp, url_prefix="")
+
+
+notify = threading.Thread(target=start_notify)
+notify.daemon = False
+notify.start()
