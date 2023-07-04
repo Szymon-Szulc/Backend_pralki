@@ -27,7 +27,7 @@ class DeviceFree(Resource):
         if int(machine["Flags"]["type"]) == 1:
             type_device = "dry"
         notify_obj = {
-            "notify-time": datetime(2005, 4, 2),
+            "notify-time": datetime(3005, 4, 2),
             "uid": user["_id"],
             "did": dorm_id,
             "machine-id": machine["Data"]["id"],
