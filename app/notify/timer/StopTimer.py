@@ -17,6 +17,6 @@ class StopTimer(Resource):
         if not user:
             return get_message("podany token jest błędny"), 400
         dorm_id = user["Data"]["did"]
-        Mongo.delete("notify", {"uid": str(user["_id"]), "did": dorm_id, "machine-id": int(args["id"])})
+        Mongo.delete("notify", {"uid": user["_id"], "did": dorm_id, "machine-id": int(args["id"])})
         return get_message("Timer usunięto"), 200
 
