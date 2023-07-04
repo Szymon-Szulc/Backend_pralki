@@ -42,6 +42,6 @@ app.register_blueprint(admin_bp, url_prefix=get_prefix("admin"))
 app.register_blueprint(tablet_bp, url_prefix=get_prefix("tablet"))
 app.register_blueprint(others_bp, url_prefix="")
 
-
-notify = threading.Thread(target=start.start_notify)
-notify.start()
+if os.getpid() == 6:
+    notify = threading.Thread(target=start.start_notify)
+    notify.start()

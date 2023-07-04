@@ -72,5 +72,5 @@ def start_notify():
     while True:
         check_db()
         print("test", file=sys.stderr, flush=True)
-        time.sleep(10)
+        time.sleep(1)
 
