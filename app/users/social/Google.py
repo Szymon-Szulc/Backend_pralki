@@ -27,9 +27,9 @@ class Google(Resource):
         res = requests.get("https://www.googleapis.com/userinfo/v2/me",
                            headers={"Authorization": "Bearer {}".format(args["token"])})
         data = res.json()
-
+        print(data)
         user = Mongo.get("users", {"PersonalData.email": data["email"]})
-
+        print(user)
         if user is None:
 
             user_object = {
