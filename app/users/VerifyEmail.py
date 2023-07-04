@@ -45,6 +45,7 @@ class VerifyEmail(Resource):
         }
 
         _id = Mongo.save_obj("users", user_object)
+        print(_id)
         Mongo.delete("cache_users", {"_id": user["_id"]})
         token = Auth.code_jwt(_id)
 
