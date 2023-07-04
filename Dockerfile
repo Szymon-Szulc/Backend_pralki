@@ -24,4 +24,4 @@ ENV API_VERSION="1"
 
 EXPOSE 3002
 
-CMD ["gunicorn", "-b", "0.0.0.0:3002","-w", "2", "--certfile", "/backend/ssl/fullchain1.pem", "--keyfile", "/backend/ssl/privkey1.pem", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:3002","-w", "2", "--certfile", "/backend/ssl/fullchain1.pem", "--keyfile", "/backend/ssl/privkey1.pem", "--capture-output", "app:app"]
