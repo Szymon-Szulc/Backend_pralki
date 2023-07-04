@@ -31,11 +31,14 @@ class Google(Resource):
         user = Mongo.get("users", {"PersonalData.email": data["email"]})
         print(user)
         if user is None:
-
+            try:
+                surname = data["family_name"]
+            except KeyError:
+                surname = ""
             user_object = {
                 "PersonalData": {
                     "name": data["given_name"].title(),
-                    "surname": data["family_name"].title(),
+                    "surname": surname.title(),
                     "email": data["email"],
                     "lang": args["lang"],
                 },
@@ -55,7 +58,7 @@ class Google(Resource):
             token = Auth.code_jwt(_id)
             return {
                 "token": token,
-                "username": user_object["PersonalData"]["name"] + " " + user_object["PersonalData"]["surname"],
+                "username": (user_object["PersonalData"]["name"] + " " + user_object["PersonalData"]["surname"]).strip(),
                 "name": user_object["PersonalData"]["name"],
                 "surname": user_object["PersonalData"]["surname"],
             }, 422
@@ -65,7 +68,7 @@ class Google(Resource):
             Mongo.update("users", {"_id": user["_id"]}, {"$set": {"PersonalData.lang": args["lang"]}})
             return {
                 "token": token,
-                "username": user["PersonalData"]["name"] + " " + user["PersonalData"]["surname"],
+                "username": (user["PersonalData"]["name"] + " " + user["PersonalData"]["surname"]).strip(),
                 "name": user["PersonalData"]["name"],
                 "surname": user["PersonalData"]["surname"],
                 "dorm_name": name
