@@ -27,7 +27,7 @@ class StartTimer(Resource):
         if machine["Flags"]["type"] == 1:
             _type = "dry"
 
-        notify = Mongo.get("notify", {"uid": user["_id"], "did": dorm_id, "machine-id": int(args["id"])})
+        notify = Mongo.get("notify", {"uid": user["_id"], "did": dorm_id, "machine-id": int(args["id"]), "type": "timer_{}".format(_type)})
         if notify is not None:
             return get_message("Timer już istnieje"), 409
 
