@@ -22,7 +22,7 @@ class AnyFree(Resource):
         if int(args["type"]) == 1:
             type_device = "dry"
         notify_obj = {
-            "notify-time": datetime(2001, 9, 11),
+            "notify-time": datetime(3000, 9, 11),
             "uid": user["_id"],
             "did": dorm_id,
             "machine-type": int(args['type']),
