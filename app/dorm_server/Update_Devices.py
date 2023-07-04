@@ -6,7 +6,7 @@ from ..Data import Mongo
 from ..common import fprint
 
 
-class Update_Devices(Resource):
+class UpdateDevices(Resource):
     def patch(self):
         parser = reqparse.RequestParser()
         parser.add_argument("token", required=True, help="Token cannot be blank!")
