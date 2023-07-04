@@ -66,7 +66,7 @@ def start_api():
     app.run(host="0.0.0.0", port=3002)
 
 def start_notify():
-    print("Start notify server...", file=sys.stderr)
+    print("Start notify server...", file=sys.stderr, flush=True)
     now = datetime.now()
     time_to_wait = (60 - now.second)
     print(time_to_wait)
