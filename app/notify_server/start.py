@@ -31,7 +31,7 @@ def send_push_notification(to, title, body):
 
 
 def check_db():
-    print("test...")
+    print("test...", file=sys.stderr, flush=True)
     timezone = pytz.timezone('UTC')
     parsed_time = datetime.now(timezone)
     rounded_time = parsed_time.replace(second=0, microsecond=0)
@@ -63,12 +63,12 @@ def start_notify():
     print("Start notify server...", file=sys.stderr, flush=True)
     now = datetime.now()
     time_to_wait = (60 - now.second)
-    print(time_to_wait)
+    print(time_to_wait, file=sys.stderr, flush=True)
 
     time.sleep(time_to_wait)
-    print("Równo!")
+    print("Równo!", file=sys.stderr, flush=True)
     while True:
         check_db()
-        # print("test")
+        print("test", file=sys.stderr, flush=True)
         time.sleep(10)
 
