@@ -1,3 +1,5 @@
+import os
+
 import requests
 import json
 import time
@@ -62,7 +64,7 @@ def check_db():
 def start_notify():
     print("Start notify server...", file=sys.stderr, flush=True)
     now = datetime.now()
-    time_to_wait = (60 - now.second)
+    time_to_wait = (60 - now.second) + int(os.getpid())
     print(time_to_wait, file=sys.stderr, flush=True)
 
     time.sleep(time_to_wait)

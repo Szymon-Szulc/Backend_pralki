@@ -22,7 +22,6 @@ if os.getenv("env_file_laundry") == "1":
     load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 
 # get vars
-running = False
 global_prefix = "/api/v{}/".format(os.environ.get("API_VERSION"))
 
 
@@ -45,6 +44,4 @@ app.register_blueprint(others_bp, url_prefix="")
 
 
 notify = threading.Thread(target=start.start_notify)
-if running is False:
-    running = True
-    notify.start()
+notify.start()
