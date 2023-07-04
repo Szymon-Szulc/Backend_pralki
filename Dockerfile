@@ -25,4 +25,4 @@ ENV HASH_KEY="JWrZOQ5ZB-jMGVosGcsmWnzY_h00TiCr_wdlNTH5gV0="
 
 EXPOSE 3002
 
-CMD ["gunicorn", "-b", "0.0.0.0:3002","-w", "2", "--certfile", "/backend/ssl/fullchain1.pem", "--keyfile", "/backend/ssl/privkey1.pem", "--capture-output", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:3002","-w", "2", "--threads=2" ,"--certfile", "/backend/ssl/fullchain1.pem", "--keyfile", "/backend/ssl/privkey1.pem", "--capture-output", "app:app"]
