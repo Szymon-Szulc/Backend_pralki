@@ -38,7 +38,7 @@ def check_db():
     parsed_time = datetime.now(timezone)
     rounded_time = parsed_time.replace(second=0, microsecond=0)
     # search_time = rounded_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    notify = Mongo.get_many("notify", {"$or": [{"$lte": {"notify-time": rounded_time}}, {"send": True}]})
+    notify = Mongo.get_many("notify", {"$or": [{"notify-time": {"$lte": rounded_time}}, {"send": True}]})
     for notif in notify:
         user = Mongo.get("users", {"_id": notif["uid"]})
         dorm_id = user["Data"]["did"]
