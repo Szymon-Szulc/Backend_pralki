@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_restful import Api
-import NotifyServer
+from .notify_server import start
 
 from .dorm_server import my_blueprint as dorms_s_bp
 from .machines import my_blueprint as machines_bp
@@ -44,5 +44,5 @@ app.register_blueprint(tablet_bp, url_prefix=get_prefix("tablet"))
 app.register_blueprint(others_bp, url_prefix="")
 
 
-notify = threading.Thread(target=NotifyServer.start_notify)
+notify = threading.Thread(target=start.start_notify)
 notify.start()
