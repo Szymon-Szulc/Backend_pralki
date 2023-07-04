@@ -32,7 +32,7 @@ class StartTimer(Resource):
             return get_message("Timer już istnieje"), 409
 
         notify_obj = {
-            "notify-time": datetime_obj.replace(second=0, microsecond=0),
+            "notify-time": datetime_obj.replace(microsecond=0),
             "uid": user["_id"],
             "did": dorm_id,
             "machine-id": int(args["id"]),
