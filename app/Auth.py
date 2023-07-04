@@ -5,6 +5,8 @@ import jwt
 from dotenv import load_dotenv
 from pymongo import MongoClient
 
+from app.common import fprint
+
 if os.environ.get("env_file_laundry") == "1":
     load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 key = os.environ.get('JWT_TOKEN')
@@ -30,7 +32,7 @@ class Auth:
     @staticmethod
     def code_jwt(user_id):
         payload = {'uid': str(user_id)}
-        print(payload)
+        fprint("payload: ", payload)
         return jwt.encode(payload, key)
 
     @staticmethod
