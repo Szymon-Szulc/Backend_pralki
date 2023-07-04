@@ -52,7 +52,7 @@ class Google(Resource):
                 }
             }
             _id = Mongo.save_obj("users", user_object)
-            token = Auth.code_jwt(user["_id"])
+            token = Auth.code_jwt(_id)
             return {
                 "token": token,
                 "username": user_object["PersonalData"]["name"] + " " + user_object["PersonalData"]["surname"],
