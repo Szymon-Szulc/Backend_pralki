@@ -1,3 +1,4 @@
+import bson
 from flask import request
 from flask_restful import Resource
 
@@ -13,7 +14,7 @@ class GetDevices(Resource):
         # args = parser.parse_args()
         args = request.args
         # AUTH METHOD
-        machines = Mongo.get_many("machines", {"Data.did": int(args["did"])})
+        machines = Mongo.get_many("machines", {"Data.did": bson.ObjectId(args["did"])})
         devices = []
         for machine in machines:
             devices.append({"mid": machine["TuyaData"]["id"], "id": machine["Data"]["id"], "localKey": machine["TuyaData"]["localKey"],
