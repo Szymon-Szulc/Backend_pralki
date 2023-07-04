@@ -31,14 +31,14 @@ def send_push_notification(to, title, body):
 
 
 def check_db():
-    print("test...", file=sys.stderr, flush=True)
+    # print("test...", file=sys.stderr, flush=True)
     timezone = pytz.timezone('UTC')
     parsed_time = datetime.now(timezone)
     rounded_time = parsed_time.replace(second=0, microsecond=0)
     # search_time = rounded_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     notify = Mongo.get_many("notify", {"$or": [{"notify-time": rounded_time}, {"send": True}]})
     for notif in notify:
-        user = Mongo.get("users", {"uid": int(notif["uid"])})
+        user = Mongo.get("users", {"_id": notif["uid"]})
         dorm_id = user["Data"]["did"]
         lang = user["PersonalData"]["lang"]
         notify_type_all = notif["type"]
@@ -48,7 +48,7 @@ def check_db():
         title = data[notify_type_all]['title']
         message = data[notify_type_all]['message']
         if notify_type == "short":
-            Mongo.update("machines", {"did": int(dorm_id), "id": int(notif["machine-id"])}, {"$set": {"lock": False}})
+            Mongo.update("machines", {"did": dorm_id, "id": int(notif["machine-id"])}, {"$set": {"lock": False}})
         send_push_notification(user["Data"]["device_token"], title.format(int(notif["machine-number"])), message.format(int(notif["machine-number"])))
         notif_table = {
             "uid": notif["uid"],
