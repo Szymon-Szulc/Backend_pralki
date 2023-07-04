@@ -1,15 +1,10 @@
-import base64
 import os
-import zlib
-
 from bson import ObjectId
 import argon2
 import jwt
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from cryptography.fernet import Fernet
-import gzip
-from app.common import fprint
 
 if os.environ.get("env_file_laundry") == "1":
     load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
